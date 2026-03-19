@@ -3,1193 +3,1492 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>El Mapa del Tresor · Anna</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<title>Per tu, Anna 🧡</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --gold: #c9a84c;
-    --gold-light: #e8d08a;
-    --gold-dark: #8b6914;
-    --parchment: #f5e6c8;
-    --parchment-dark: #e8d4a8;
-    --parchment-deep: #d4b896;
-    --ink: #2c1810;
-    --ink-light: #4a2c1a;
-    --red-seal: #8b1a1a;
-    --teal: #2a6b6b;
-    --shadow: rgba(44,24,16,0.4);
-  }
+/* ════════════════════════════════════
+   DESIGN SYSTEM
+   Warm, joyful, modern — orange + yellow
+   accent palette on clean white/cream.
+   Typography: Plus Jakarta Sans (body/UI)
+   + Fraunces (display/emotional moments)
+════════════════════════════════════ */
+:root {
+  /* Core palette */
+  --orange:       #FF6B35;
+  --orange-light: #FF8C5A;
+  --orange-pale:  #FFE4D6;
+  --orange-deep:  #D94F1E;
+  --yellow:       #FFD23F;
+  --yellow-light: #FFE57A;
+  --yellow-pale:  #FFF8DC;
+  --yellow-deep:  #E6A800;
+  --coral:        #FF8C69;
+  --peach:        #FFECD2;
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  /* Neutral warm */
+  --white:        #FFFFFF;
+  --cream:        #FFFBF5;
+  --warm-100:     #FFF3E8;
+  --warm-200:     #FFE8D0;
+  --warm-300:     #F0D4B8;
+  --ink:          #1A1006;
+  --ink-soft:     #3D2A14;
+  --ink-muted:    #7A5C3C;
+  --ink-faint:    #B89470;
 
-  html, body {
-    width: 100%; min-height: 100vh;
-    font-family: 'EB Garamond', serif;
-    background: #1a0f05;
-    overflow-x: hidden;
-  }
+  /* Accent */
+  --green:        #52C41A;
+  --pink:         #FF6B9D;
 
-  /* ─── PARCHMENT TEXTURE ─── */
-  .parchment-bg {
-    background-color: var(--parchment);
-    background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"),
-      radial-gradient(ellipse at 20% 20%, rgba(255,240,200,0.6) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 80%, rgba(210,170,120,0.4) 0%, transparent 60%);
-  }
+  /* Shadows */
+  --shadow-sm:    0 2px 8px rgba(255,107,53,0.15);
+  --shadow-md:    0 4px 20px rgba(255,107,53,0.2);
+  --shadow-lg:    0 8px 40px rgba(255,107,53,0.25);
+  --shadow-card:  0 2px 12px rgba(26,16,6,0.08), 0 0 0 1px rgba(255,107,53,0.08);
+}
 
-  /* ─── SCREENS ─── */
-  .screen {
-    display: none;
-    min-height: 100vh;
-    width: 100%;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 0 40px;
-    animation: fadeIn 0.8s ease forwards;
-    position: relative;
-  }
-  .screen.active { display: flex; }
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:16px; scroll-behavior:smooth; }
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  background: var(--cream);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+/* ════════════════════════════════════
+   SCREEN SYSTEM
+   RULE: always starts s0. Never restores
+   screen position from storage.
+════════════════════════════════════ */
+.screen { display:none; min-height:100vh; flex-direction:column; }
+.screen--active {
+  display:flex;
+  animation: screenIn 0.55s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes screenIn {
+  from { opacity:0; transform:translateY(24px) scale(0.99); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
 
-  /* ─── BORDER FRAME ─── */
-  .frame {
-    width: calc(100% - 28px);
-    margin: 14px auto;
-    border: 2px solid var(--gold);
-    box-shadow:
-      0 0 0 4px var(--parchment-dark),
-      0 0 0 6px var(--gold-dark),
-      0 0 24px rgba(201,168,76,0.3),
-      inset 0 0 30px rgba(201,168,76,0.08);
-    border-radius: 4px;
-    position: relative;
-    overflow: hidden;
-  }
-  .frame::before, .frame::after {
-    content: '✦';
-    position: absolute;
-    color: var(--gold);
-    font-size: 18px;
-    line-height: 1;
-  }
-  .frame::before { top: 8px; left: 8px; }
-  .frame::after  { bottom: 8px; right: 8px; }
+/* ════════════════════════════════════
+   ANIMATED BACKGROUND
+════════════════════════════════════ */
+.screen-bg {
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+.bg-blob {
+  position:absolute; border-radius:50%;
+  filter: blur(60px); opacity:0.35;
+  animation: blobFloat var(--dur,12s) ease-in-out infinite;
+  animation-delay: var(--del,0s);
+}
+@keyframes blobFloat {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%      { transform: translate(20px,-15px) scale(1.05); }
+  66%      { transform: translate(-15px,10px) scale(0.97); }
+}
+.blob-1 { width:300px;height:300px; background:var(--orange-pale); top:-80px; right:-60px; --dur:14s; }
+.blob-2 { width:250px;height:250px; background:var(--yellow-pale); bottom:-40px; left:-60px; --dur:11s; --del:-4s; }
+.blob-3 { width:180px;height:180px; background:var(--peach); top:40%; left:30%; --dur:16s; --del:-7s; }
 
-  /* ─── HEADER BAND ─── */
-  .header-band {
-    width: 100%;
-    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-light) 50%, var(--ink) 100%);
-    padding: 18px 20px 14px;
-    text-align: center;
-    position: relative;
-    border-bottom: 3px solid var(--gold);
-  }
-  .header-band::after {
-    content: '';
-    position: absolute;
-    bottom: -8px; left: 50%;
-    transform: translateX(-50%);
-    width: 60px; height: 14px;
-    background: var(--ink);
-    clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%);
-    border-bottom: 2px solid var(--gold);
-  }
-  .stop-number {
-    font-family: 'Cinzel', serif;
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: var(--gold-light);
-    text-transform: uppercase;
-    opacity: 0.8;
-    margin-bottom: 4px;
-  }
-  .stop-title {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 20px;
-    color: var(--gold-light);
-    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    line-height: 1.2;
-  }
+/* ════════════════════════════════════
+   FLOATING PARTICLES (JS-generated)
+════════════════════════════════════ */
+.particle {
+  position:fixed; pointer-events:none; z-index:1; font-size:var(--sz,16px);
+  animation: particleDrift var(--dur,20s) linear infinite;
+  animation-delay: var(--del,0s);
+  opacity: 0.4;
+}
+@keyframes particleDrift {
+  from { transform: translateY(110vh) rotate(0deg); opacity:0; }
+  10%  { opacity:0.4; }
+  90%  { opacity:0.35; }
+  to   { transform: translateY(-10vh) rotate(360deg); opacity:0; }
+}
 
-  /* ─── CONTENT AREA ─── */
-  .content-area {
-    width: 100%;
-    padding: 28px 20px 20px;
-    flex: 1;
-  }
+/* ════════════════════════════════════
+   PAGE WRAPPER
+════════════════════════════════════ */
+.page-wrap {
+  position:relative; z-index:2;
+  width:100%; max-width:430px;
+  margin:0 auto;
+  flex:1; display:flex; flex-direction:column;
+  padding: 0 0 24px;
+}
 
-  /* ─── MAP ROUTE ─── */
-  .map-route {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    padding: 12px 0 6px;
-    flex-wrap: wrap;
-  }
-  .route-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--parchment-deep);
-    border: 2px solid var(--gold-dark);
-    transition: all 0.4s ease;
-  }
-  .route-dot.done { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
-  .route-dot.active { background: var(--red-seal); box-shadow: 0 0 8px var(--red-seal); transform: scale(1.3); }
-  .route-line { width: 18px; height: 2px; background: var(--gold-dark); opacity: 0.5; }
+/* ════════════════════════════════════
+   HEADER
+════════════════════════════════════ */
+.top-bar {
+  padding: 20px 24px 0;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.top-bar-logo {
+  font-family: 'Fraunces', serif;
+  font-size:22px; font-weight:700; font-style:italic;
+  background: linear-gradient(135deg, var(--orange), var(--yellow-deep));
+  -webkit-background-clip: text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.top-bar-date {
+  font-size:11px; font-weight:600; letter-spacing:2px;
+  text-transform:uppercase; color:var(--ink-faint);
+}
 
-  /* ─── COMPASS ROSE ─── */
-  .compass {
-    text-align: center;
-    font-size: 48px;
-    margin: 10px 0;
-    animation: compassSpin 20s linear infinite;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-    display: inline-block;
-  }
-  @keyframes compassSpin {
-    0%   { transform: rotate(0deg); }
-    25%  { transform: rotate(3deg); }
-    75%  { transform: rotate(-3deg); }
-    100% { transform: rotate(0deg); }
-  }
+/* ════════════════════════════════════
+   HERO CARD (Welcome)
+════════════════════════════════════ */
+.hero-card {
+  margin: 18px 20px 0;
+  background: linear-gradient(145deg, var(--orange) 0%, var(--orange-deep) 40%, #C0392B 100%);
+  border-radius: 28px;
+  padding: 32px 26px 28px;
+  position:relative; overflow:hidden;
+  box-shadow: 0 16px 48px rgba(255,107,53,0.45), 0 2px 0 rgba(255,255,255,0.2) inset;
+}
+.hero-card::before {
+  content:'';
+  position:absolute; inset:0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='20' cy='20' r='40' fill='rgba(255,255,255,0.06)'/%3E%3Ccircle cx='180' cy='160' r='60' fill='rgba(255,255,255,0.04)'/%3E%3Ccircle cx='100' cy='80' r='30' fill='rgba(255,255,255,0.05)'/%3E%3C/svg%3E");
+  pointer-events:none;
+}
+.hero-card::after {
+  content:'';
+  position:absolute;
+  top:-30px; right:-30px;
+  width:120px; height:120px;
+  border-radius:50%;
+  background: rgba(255,255,255,0.08);
+  pointer-events:none;
+}
+.hero-emoji-row {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  margin-bottom:16px;
+}
+.hero-main-emoji {
+  font-size:52px;
+  animation: heroFloat 4s ease-in-out infinite;
+  filter:drop-shadow(0 6px 14px rgba(0,0,0,0.25));
+  display:inline-block;
+}
+@keyframes heroFloat {
+  0%,100% { transform:translateY(0) rotate(-3deg); }
+  50%      { transform:translateY(-8px) rotate(3deg); }
+}
+.hero-badge {
+  background:rgba(255,255,255,0.2);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.3);
+  border-radius:20px; padding:6px 14px;
+  font-size:11px; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase; color:#fff;
+}
+.hero-name {
+  font-family:'Fraunces',serif;
+  font-size:46px; font-weight:700; font-style:italic;
+  color:#fff; line-height:1;
+  text-shadow:0 3px 16px rgba(0,0,0,0.2);
+  margin-bottom:8px;
+}
+.hero-sub {
+  font-size:14px; font-weight:500;
+  color:rgba(255,255,255,0.8);
+  line-height:1.5;
+}
+/* Stars deco inside hero */
+.hero-stars {
+  position:absolute; bottom:16px; right:20px;
+  display:flex; gap:4px;
+}
+.hero-star {
+  font-size:14px;
+  animation:starPop var(--dur,2s) ease-in-out infinite;
+  animation-delay:var(--del,0s);
+}
+@keyframes starPop {
+  0%,100%{transform:scale(1);opacity:0.7;}
+  50%{transform:scale(1.3);opacity:1;}
+}
 
-  /* ─── SEAL ─── */
-  .wax-seal {
-    width: 70px; height: 70px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #c0392b, var(--red-seal) 50%, #6b0f0f);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 16px;
-    font-size: 28px;
-    animation: sealPulse 3s ease-in-out infinite;
-  }
-  @keyframes sealPulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-    50% { transform: scale(1.04); box-shadow: 0 6px 20px rgba(139,26,26,0.5); }
-  }
+/* ════════════════════════════════════
+   LETTER CARD
+════════════════════════════════════ */
+.letter-card {
+  margin: 16px 20px 0;
+  background:#fff;
+  border-radius:22px;
+  padding:24px 22px;
+  box-shadow:var(--shadow-card);
+  position:relative; overflow:hidden;
+}
+.letter-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:4px;
+  background:linear-gradient(90deg, var(--orange), var(--yellow), var(--orange-light));
+  border-radius:22px 22px 0 0;
+}
+.letter-top {
+  display:flex; align-items:center; gap:10px; margin-bottom:14px;
+}
+.letter-icon {
+  width:36px; height:36px; border-radius:12px;
+  background:var(--orange-pale);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px; flex-shrink:0;
+}
+.letter-from {
+  font-size:12px; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; color:var(--orange);
+}
+.letter-title {
+  font-family:'Fraunces',serif;
+  font-size:17px; font-weight:500; font-style:italic;
+  color:var(--ink-soft);
+  margin-top:1px;
+}
+.letter-body {
+  font-size:17px; font-weight:400; line-height:1.9;
+  color:var(--ink-soft);
+  font-style:italic;
+}
+.letter-body em { font-style:italic; color:var(--orange-deep); font-weight:600; }
 
-  /* ─── WELCOME TEXT ─── */
-  .welcome-title {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 28px;
-    color: var(--ink);
-    text-align: center;
-    margin-bottom: 6px;
-    text-shadow: 1px 1px 0 var(--parchment-deep);
-  }
-  .welcome-subtitle {
-    font-family: 'Cinzel', serif;
-    font-size: 12px;
-    letter-spacing: 3px;
-    color: var(--gold-dark);
-    text-align: center;
-    margin-bottom: 24px;
-    text-transform: uppercase;
-  }
-  .welcome-text {
-    font-size: 17px;
-    line-height: 1.8;
-    color: var(--ink-light);
-    text-align: center;
-    font-style: italic;
-    padding: 0 4px;
-    position: relative;
-  }
-  .welcome-text::before, .welcome-text::after {
-    content: '❝';
-    color: var(--gold);
-    font-size: 28px;
-    opacity: 0.6;
-    display: block;
-    text-align: left;
-    line-height: 1;
-  }
-  .welcome-text::after { content: '❞'; text-align: right; }
+/* ════════════════════════════════════
+   SECTION LABEL
+════════════════════════════════════ */
+.section-label {
+  padding: 20px 24px 10px;
+  font-size:11px; font-weight:800; letter-spacing:2px;
+  text-transform:uppercase; color:var(--ink-faint);
+  display:flex; align-items:center; gap:8px;
+}
+.section-label::after {
+  content:''; flex:1; height:1px;
+  background:linear-gradient(90deg,var(--warm-300),transparent);
+}
 
-  /* ─── SECTION DIVIDER ─── */
-  .divider {
-    display: flex; align-items: center; gap: 10px;
-    margin: 18px 0;
-  }
-  .divider::before, .divider::after {
-    content: ''; flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold-dark), transparent);
-  }
-  .divider-icon { color: var(--gold); font-size: 16px; }
+/* ════════════════════════════════════
+   ROUTE MAP (hidden stops)
+   Shows only unlocked + next locked
+════════════════════════════════════ */
+.route-map {
+  padding: 0 20px;
+  display:flex; flex-direction:column; gap:12px;
+  margin-bottom:4px;
+}
+.route-stop {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 16px;
+  border-radius:18px;
+  background:#fff;
+  box-shadow:var(--shadow-card);
+  position:relative;
+  transition:all 0.4s ease;
+  overflow:hidden;
+}
+.route-stop::before {
+  content:''; position:absolute;
+  left:0;top:0;bottom:0;width:4px;
+  border-radius:18px 0 0 18px;
+  background:var(--warm-200);
+  transition:background 0.4s ease;
+}
+.route-stop.unlocked::before { background:linear-gradient(180deg,var(--orange),var(--yellow-deep)); }
+.route-stop.active-stop::before { background:linear-gradient(180deg,var(--orange),var(--coral)); animation:activePulse 2s ease-in-out infinite; }
+@keyframes activePulse { 0%,100%{opacity:1;}50%{opacity:0.6;} }
+.route-stop.locked { opacity:0.45; filter:grayscale(0.3); }
+.route-stop.hidden-stop { display:none; }
 
-  /* ─── SCORING GRID ─── */
-  .scoring-section { margin-bottom: 8px; }
-  .scoring-label {
-    font-family: 'Cinzel', serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold-dark);
-    margin-bottom: 14px;
-    text-align: center;
-  }
+.stop-icon-wrap {
+  width:44px;height:44px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px; flex-shrink:0;
+  transition:all 0.4s ease;
+}
+.route-stop.unlocked .stop-icon-wrap { background:var(--orange-pale); }
+.route-stop.active-stop .stop-icon-wrap { background:linear-gradient(135deg,var(--orange-pale),var(--yellow-pale)); box-shadow:0 4px 12px rgba(255,107,53,0.25); }
+.route-stop.locked .stop-icon-wrap { background:var(--warm-100); }
 
-  .score-category {
-    background: rgba(201,168,76,0.08);
-    border: 1px solid rgba(201,168,76,0.3);
-    border-radius: 8px;
-    padding: 14px 14px 10px;
-    margin-bottom: 12px;
-  }
-  .cat-name {
-    font-family: 'Cinzel', serif;
-    font-size: 13px;
-    color: var(--ink);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .cat-icon { font-size: 18px; }
+.stop-info { flex:1; min-width:0; }
+.stop-name {
+  font-size:15px; font-weight:700; color:var(--ink);
+  margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.route-stop.locked .stop-name { color:var(--ink-faint); }
+.stop-desc { font-size:12px; font-weight:400; color:var(--ink-muted); }
+.route-stop.locked .stop-desc { color:var(--ink-faint); }
 
-  .score-row {
-    display: grid;
-    grid-template-columns: 52px 1fr 52px;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-  .score-name {
-    font-family: 'Cinzel', serif;
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-align: center;
-    color: var(--ink-light);
-    text-transform: uppercase;
-  }
-  .score-name.alex { color: var(--teal); }
-  .score-name.anna { color: var(--red-seal); }
+.stop-status {
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px; flex-shrink:0;
+  background:var(--warm-100);
+  transition:all 0.4s ease;
+}
+.route-stop.unlocked .stop-status { background:#E8F5E9; color:var(--green); font-size:14px; }
+.route-stop.active-stop .stop-status { background:linear-gradient(135deg,var(--orange),var(--yellow-deep)); color:#fff; animation:statusSpin 3s linear infinite; }
+@keyframes statusSpin { 0%,100%{transform:scale(1);}50%{transform:scale(1.15);} }
+.route-stop.locked .stop-status { color:var(--ink-faint); font-size:11px; }
 
-  .score-val {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 22px;
-    text-align: center;
-    font-weight: 700;
-    transition: all 0.2s ease;
-  }
-  .score-val.alex { color: var(--teal); }
-  .score-val.anna { color: var(--red-seal); }
+/* Connector line between stops */
+.stop-connector {
+  width:2px; height:14px;
+  background:linear-gradient(180deg,var(--warm-300),transparent);
+  margin-left:34px;
+}
+.stop-connector.done { background:linear-gradient(180deg,var(--orange),var(--yellow-deep)); }
 
-  .slider-wrapper { position: relative; }
-  input[type=range] {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 6px;
-    border-radius: 3px;
-    background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
-    outline: none;
-    cursor: pointer;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, var(--gold-light), var(--gold-dark));
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    cursor: pointer;
-    transition: transform 0.15s ease;
-  }
-  input[type=range]::-webkit-slider-thumb:active { transform: scale(1.2); }
+/* ════════════════════════════════════
+   SCREEN HEADER (inner screens)
+════════════════════════════════════ */
+.screen-header {
+  padding:20px 24px 0;
+  display:flex; align-items:center; gap:14px;
+}
+.screen-header-icon {
+  width:52px;height:52px;border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex-shrink:0;
+  box-shadow:var(--shadow-md);
+}
+.screen-header-info { flex:1; }
+.screen-header-eyebrow {
+  font-size:10px;font-weight:800;letter-spacing:2.5px;
+  text-transform:uppercase; color:var(--orange); margin-bottom:3px;
+}
+.screen-header-title {
+  font-family:'Fraunces',serif;
+  font-size:26px;font-weight:700;font-style:italic;
+  color:var(--ink); line-height:1.1;
+}
 
-  /* ─── BODY TEXT ─── */
-  .body-text {
-    font-size: 16px;
-    line-height: 1.85;
-    color: var(--ink-light);
-    text-align: justify;
-    font-style: italic;
-  }
+/* ════════════════════════════════════
+   PROGRESS BAR (inner screens)
+════════════════════════════════════ */
+.progress-bar-wrap {
+  padding: 14px 24px 0;
+  display:flex; align-items:center; gap:10px;
+}
+.progress-bar-bg {
+  flex:1; height:6px; border-radius:3px;
+  background:var(--warm-200); overflow:hidden;
+}
+.progress-bar-fill {
+  height:100%; border-radius:3px;
+  background:linear-gradient(90deg,var(--orange),var(--yellow));
+  transition:width 1s cubic-bezier(0.22,1,0.36,1);
+  position:relative; overflow:hidden;
+}
+.progress-bar-fill::after {
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.4) 50%,transparent 100%);
+  animation:progressShine 2s ease-in-out infinite;
+}
+@keyframes progressShine { from{transform:translateX(-100%);}to{transform:translateX(200%);} }
+.progress-label {
+  font-size:11px;font-weight:700;color:var(--orange);
+  white-space:nowrap;
+}
 
-  /* ─── ICON BADGE ─── */
-  .icon-badge {
-    text-align: center;
-    font-size: 52px;
-    margin: 8px 0 16px;
-    animation: floatBob 4s ease-in-out infinite;
-  }
-  @keyframes floatBob {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-6px); }
-  }
+/* ════════════════════════════════════
+   CARDS
+════════════════════════════════════ */
+.card {
+  margin:14px 20px 0;
+  background:#fff;
+  border-radius:22px;
+  padding:20px;
+  box-shadow:var(--shadow-card);
+  position:relative;overflow:hidden;
+}
+.card-top-accent {
+  position:absolute;top:0;left:0;right:0;height:3px;
+  border-radius:22px 22px 0 0;
+}
+.card-title {
+  font-size:12px;font-weight:800;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--orange);
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:6px;
+}
+.card-title-dot {
+  width:6px;height:6px;border-radius:50%;
+  background:var(--yellow);display:inline-block;
+}
 
-  /* ─── RESULTS TABLE ─── */
-  .results-card {
-    background: rgba(44,24,16,0.06);
-    border: 1px solid var(--gold-dark);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 18px;
-  }
-  .results-header {
-    background: linear-gradient(135deg, var(--ink), var(--ink-light));
-    padding: 10px 16px;
-    display: grid;
-    grid-template-columns: 1fr 80px 80px;
-    gap: 6px;
-  }
-  .results-header span {
-    font-family: 'Cinzel', serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-align: center;
-    color: var(--gold-light);
-  }
-  .results-header span:first-child { text-align: left; }
+/* ════════════════════════════════════
+   SCORING BLOCKS
+════════════════════════════════════ */
+.score-block {
+  background:var(--warm-100);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:12px;
+  position:relative;overflow:hidden;
+  transition:transform 0.2s ease, box-shadow 0.2s ease;
+  border:1.5px solid transparent;
+  transition:border-color 0.3s;
+}
+.score-block:focus-within { border-color:var(--orange-pale); box-shadow:0 0 0 3px rgba(255,107,53,0.08); }
+.score-cat-row {
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;
+}
+.score-cat-emoji { font-size:20px;flex-shrink:0; }
+.score-cat-name {
+  font-size:14px;font-weight:700;color:var(--ink);flex:1;
+}
+.score-players-grid {
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.player-col { display:flex;flex-direction:column;align-items:center;gap:6px; }
+.player-chip {
+  padding:4px 12px;border-radius:20px;
+  font-size:10px;font-weight:800;letter-spacing:1px;
+  text-transform:uppercase;
+}
+.player-chip.alex { background:rgba(82,196,26,0.15);color:#2e7d32; }
+.player-chip.anna { background:rgba(255,107,53,0.15);color:var(--orange-deep); }
+.player-num {
+  font-family:'Fraunces',serif;
+  font-size:34px;font-weight:700;line-height:1;
+  transition:all 0.15s ease;
+}
+.player-num.alex { color:#2e7d32; }
+.player-num.anna { color:var(--orange); }
+.player-num.bump { animation:numBump 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes numBump { 0%{transform:scale(1);}50%{transform:scale(1.3);}100%{transform:scale(1);} }
+input[type="range"] {
+  -webkit-appearance:none; width:100%; height:6px;
+  border-radius:3px; outline:none; cursor:pointer;
+}
+input[type="range"].r-alex::-webkit-slider-thumb {
+  -webkit-appearance:none;width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#a8e6a8,#2e7d32);
+  box-shadow:0 2px 8px rgba(46,125,50,0.4);cursor:pointer;
+}
+input[type="range"].r-anna::-webkit-slider-thumb {
+  -webkit-appearance:none;width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,var(--orange-light),var(--orange-deep));
+  box-shadow:0 2px 8px rgba(255,107,53,0.4);cursor:pointer;
+}
+input[type="range"]::-webkit-slider-thumb:active{transform:scale(1.2);}
 
-  .results-row {
-    padding: 10px 16px;
-    display: grid;
-    grid-template-columns: 1fr 80px 80px;
-    gap: 6px;
-    border-bottom: 1px solid rgba(201,168,76,0.15);
-    transition: background 0.2s;
-  }
-  .results-row:last-child { border-bottom: none; }
-  .results-row span { font-size: 14px; color: var(--ink-light); text-align: center; }
-  .results-row span:first-child { text-align: left; font-style: italic; }
-  .results-row .s-alex { color: var(--teal); font-family: 'Cinzel', serif; font-weight: 600; }
-  .results-row .s-anna { color: var(--red-seal); font-family: 'Cinzel', serif; font-weight: 600; }
+/* ════════════════════════════════════
+   INFO MESSAGE CARD
+════════════════════════════════════ */
+.info-card {
+  margin:14px 20px 0;
+  background:linear-gradient(135deg,var(--orange-pale),var(--yellow-pale));
+  border-radius:22px;
+  padding:22px;
+  border:1.5px solid var(--orange-pale);
+  position:relative;overflow:hidden;
+}
+.info-card::after {
+  content:'💬';
+  position:absolute;bottom:-6px;right:14px;
+  font-size:54px;opacity:0.08;
+  animation:iconFloat 6s ease-in-out infinite;
+}
+@keyframes iconFloat{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-6px) rotate(5deg);}}
+.info-card-label {
+  font-size:10px;font-weight:800;letter-spacing:2px;
+  text-transform:uppercase;color:var(--orange);margin-bottom:8px;
+}
+.info-card-text {
+  font-size:16px;font-weight:400;line-height:1.85;color:var(--ink-soft);
+  font-style:italic;
+}
 
-  .results-total {
-    background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.05));
-    padding: 12px 16px;
-    display: grid;
-    grid-template-columns: 1fr 80px 80px;
-    gap: 6px;
-    border-top: 2px solid var(--gold);
-  }
-  .results-total span { text-align: center; }
-  .results-total .label {
-    font-family: 'Cinzel', serif;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--gold-dark);
-    text-align: left;
-  }
-  .results-total .t-alex { font-family: 'Cinzel Decorative', serif; font-size: 24px; color: var(--teal); }
-  .results-total .t-anna { font-family: 'Cinzel Decorative', serif; font-size: 24px; color: var(--red-seal); }
+/* ════════════════════════════════════
+   DECORATIVE DOODLES (CSS shapes)
+════════════════════════════════════ */
+.doodle-row {
+  padding:0 20px;
+  display:flex;align-items:center;gap:8px;
+  margin:8px 0;
+}
+.doodle-line {
+  flex:1;height:1.5px;
+  background:linear-gradient(90deg,transparent,var(--warm-300),transparent);
+}
+.doodle-dot {
+  width:8px;height:8px;border-radius:50%;
+  background:var(--orange-pale);border:1.5px solid var(--warm-300);
+}
+.doodle-diamond {
+  width:8px;height:8px;border-radius:1px;
+  background:var(--yellow-pale);border:1.5px solid var(--warm-300);
+  transform:rotate(45deg);
+}
 
-  .winner-banner {
-    text-align: center;
-    padding: 14px;
-    background: linear-gradient(135deg, var(--ink), #3a1f0a);
-    border-radius: 8px;
-    margin-bottom: 16px;
-    border: 1px solid var(--gold);
-  }
-  .winner-label {
-    font-family: 'Cinzel', serif;
-    font-size: 10px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--gold-dark);
-    margin-bottom: 4px;
-  }
-  .winner-name {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 26px;
-    color: var(--gold-light);
-    text-shadow: 0 0 20px rgba(201,168,76,0.6);
-    animation: glow 2s ease-in-out infinite;
-  }
-  @keyframes glow {
-    0%, 100% { text-shadow: 0 0 10px rgba(201,168,76,0.4); }
-    50%       { text-shadow: 0 0 30px rgba(201,168,76,0.9), 0 0 60px rgba(201,168,76,0.4); }
-  }
+/* Decorative floating shapes behind content */
+.deco-shape {
+  position:absolute;border-radius:50%;
+  opacity:0.18;pointer-events:none;
+  animation:decoFloat var(--dur,10s) ease-in-out infinite;
+  animation-delay:var(--del,0s);
+}
+@keyframes decoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
 
-  /* ─── CASTLE SCREEN ─── */
-  .castle-art {
-    text-align: center;
-    font-size: 72px;
-    margin: 16px 0 8px;
-    animation: castleReveal 1s ease forwards;
-    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
-  }
-  @keyframes castleReveal {
-    from { transform: scale(0.5) translateY(30px); opacity: 0; }
-    to   { transform: scale(1) translateY(0); opacity: 1; }
-  }
-  .treasure-chest {
-    font-size: 60px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    margin: 10px 0;
-    animation: chestBounce 1s ease 1.2s both;
-  }
-  @keyframes chestBounce {
-    0%   { transform: scale(0) rotate(-10deg); }
-    60%  { transform: scale(1.15) rotate(5deg); }
-    100% { transform: scale(1) rotate(0deg); }
-  }
-  .treasure-chest.open { animation: chestOpen 0.5s ease forwards; }
-  @keyframes chestOpen {
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.2) rotate(-5deg); }
-    100% { transform: scale(1.1); filter: drop-shadow(0 0 20px gold); }
-  }
+/* ════════════════════════════════════
+   TAPAS SCREEN DECORATION
+════════════════════════════════════ */
+.tile-strip {
+  height:10px;
+  background:repeating-linear-gradient(90deg,
+    var(--orange) 0,var(--orange) 20px,
+    var(--yellow) 20px,var(--yellow) 22px,
+    var(--coral) 22px,var(--coral) 42px,
+    var(--yellow) 42px,var(--yellow) 44px);
+  flex-shrink:0;
+}
+.restaurant-deco {
+  margin:14px 20px 0;
+  background:#fff;border-radius:22px;
+  padding:18px 20px;
+  box-shadow:var(--shadow-card);
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.resto-item {
+  border-radius:14px;padding:14px 12px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.resto-item.warm { background:var(--orange-pale); }
+.resto-item.sunny { background:var(--yellow-pale); }
+.resto-item-icon { font-size:28px; animation:iconFloat 5s ease-in-out infinite; animation-delay:var(--del,0s); }
+.resto-item-label {
+  font-size:11px;font-weight:700;
+  letter-spacing:0.5px;line-height:1.3;
+}
+.resto-item.warm .resto-item-label { color:var(--orange-deep); }
+.resto-item.sunny .resto-item-label { color:var(--yellow-deep); }
 
-  /* ─── CONFETTI ─── */
-  #confetti-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 9999;
-  }
+/* ════════════════════════════════════
+   GAUDI MOSAIC
+════════════════════════════════════ */
+.gaudi-wrap {
+  margin:14px 20px 0;
+  border-radius:20px;overflow:hidden;
+  box-shadow:var(--shadow-card);
+}
+.gaudi-mosaic {
+  display:grid;grid-template-columns:repeat(8,1fr);
+  gap:3px;background:#fff;padding:3px;
+}
+.mosaic-cell {
+  aspect-ratio:1;border-radius:4px;
+  animation:mosaicPulse var(--dur,3s) ease-in-out infinite;
+  animation-delay:var(--delay,0s);
+}
+@keyframes mosaicPulse { 0%,100%{opacity:0.8;transform:scale(1);}50%{opacity:1;transform:scale(1.04);} }
 
-  /* ─── SLIDE-TO-UNLOCK BUTTON ─── */
-  .slider-btn-wrap {
-    position: relative;
-    width: calc(100% - 40px);
-    margin: 24px auto 8px;
-    height: 58px;
-    background: linear-gradient(135deg, var(--ink), var(--ink-light));
-    border-radius: 29px;
-    border: 2px solid var(--gold-dark);
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(201,168,76,0.2);
-  }
-  .slider-btn-track {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    padding-left: 72px;
-    pointer-events: none;
-  }
-  .slider-btn-label {
-    font-family: 'Cinzel', serif;
-    font-size: 13px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgba(201,168,76,0.7);
-    animation: labelPulse 2s ease-in-out infinite;
-    white-space: nowrap;
-  }
-  @keyframes labelPulse {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-  }
-  .slider-btn-arrows {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(201,168,76,0.4);
-    font-size: 18px;
-    letter-spacing: -4px;
-    pointer-events: none;
-  }
-  .slider-btn-handle {
-    position: absolute;
-    top: 5px; left: 5px;
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, var(--gold-light), var(--gold-dark));
-    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
-    cursor: grab;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    z-index: 2;
-    transition: box-shadow 0.2s ease;
-    touch-action: none;
-    user-select: none;
-  }
-  .slider-btn-handle:active { cursor: grabbing; box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
-  .slider-btn-handle.completed {
-    left: calc(100% - 53px) !important;
-    background: radial-gradient(circle at 35% 35%, #6dbb6d, #2e7d32);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.4), 0 0 20px rgba(76,175,80,0.6);
-  }
+/* ════════════════════════════════════
+   RESULTS
+════════════════════════════════════ */
+.winner-card {
+  margin:14px 20px 0;
+  background:linear-gradient(145deg,var(--orange) 0%,var(--orange-deep) 50%,#C0392B 100%);
+  border-radius:24px;
+  padding:26px 22px;
+  text-align:center;
+  box-shadow:var(--shadow-lg);
+  position:relative;overflow:hidden;
+}
+.winner-card::before {
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='180' cy='20' r='60' fill='rgba(255,255,255,0.07)'/%3E%3Ccircle cx='20' cy='180' r='50' fill='rgba(255,255,255,0.05)'/%3E%3C/svg%3E");
+}
+.winner-emoji { font-size:48px;display:block;margin-bottom:8px; animation:winnerBounce 1.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+@keyframes winnerBounce { from{transform:scale(0) rotate(-20deg);opacity:0;} to{transform:scale(1) rotate(0);opacity:1;} }
+.winner-tag {
+  font-size:10px;font-weight:800;letter-spacing:3px;
+  text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:4px;
+}
+.winner-name {
+  font-family:'Fraunces',serif;
+  font-size:36px;font-weight:700;font-style:italic;
+  color:#fff;
+  text-shadow:0 3px 16px rgba(0,0,0,0.2);
+  animation:winnerGlow 2s ease-in-out infinite;
+}
+@keyframes winnerGlow { 0%,100%{text-shadow:0 2px 8px rgba(0,0,0,0.2);}50%{text-shadow:0 2px 8px rgba(0,0,0,0.2),0 0 30px rgba(255,210,63,0.6);} }
 
-  /* ─── THEME OVERLAYS ─── */
-  /* Clay theme */
-  .clay-bg {
-    background-color: #c4956a;
-    background-image:
-      radial-gradient(ellipse at 30% 20%, #d4a67a 0%, transparent 50%),
-      radial-gradient(ellipse at 70% 80%, #a0724a 0%, transparent 50%);
-  }
-  .clay-bg .frame {
-    background: #f0dcc4;
-    background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0.2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
-  }
-  .clay-handprints {
-    position: absolute;
-    top: 0; right: 0;
-    font-size: 60px;
-    opacity: 0.12;
-    transform: rotate(25deg) translate(10px, -10px);
-    pointer-events: none;
-  }
+.scores-table-card {
+  margin:12px 20px 0;
+  background:#fff;border-radius:22px;
+  overflow:hidden;box-shadow:var(--shadow-card);
+}
+.scores-tbl { width:100%;border-collapse:collapse; }
+.scores-tbl thead tr { background:var(--warm-100); }
+.scores-tbl thead th {
+  padding:12px 10px;font-size:10px;font-weight:800;
+  letter-spacing:2px;text-transform:uppercase;text-align:center;color:var(--ink-muted);
+}
+.scores-tbl thead th:first-child { text-align:left;padding-left:16px; }
+.scores-tbl tbody tr { border-bottom:1px solid var(--warm-100); }
+.scores-tbl tbody tr.section-hdr td {
+  padding:8px 10px 4px 16px;
+  font-size:9px;font-weight:800;letter-spacing:2px;
+  text-transform:uppercase;color:var(--orange);
+  background:rgba(255,107,53,0.04);
+}
+.scores-tbl td { padding:10px 10px;font-size:13px;color:var(--ink-soft); }
+.scores-tbl td:first-child { padding-left:16px; }
+.scores-tbl td.v-alex { text-align:center;font-weight:800;color:#2e7d32;font-size:15px; }
+.scores-tbl td.v-anna { text-align:center;font-weight:800;color:var(--orange);font-size:15px; }
+.scores-tbl tfoot tr { background:var(--warm-100);border-top:2px solid var(--warm-200); }
+.scores-tbl tfoot td { padding:14px 10px;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ink-muted); }
+.scores-tbl tfoot td:first-child { padding-left:16px; }
+.scores-tbl tfoot .tot-alex { text-align:center;font-family:'Fraunces',serif;font-size:26px;font-weight:700;color:#2e7d32;font-style:normal; }
+.scores-tbl tfoot .tot-anna { text-align:center;font-family:'Fraunces',serif;font-size:26px;font-weight:700;color:var(--orange);font-style:normal; }
 
-  /* Tapas theme */
-  .tapas-tile {
-    width: 100%;
-    height: 8px;
-    background: repeating-linear-gradient(
-      90deg,
-      var(--teal) 0px, var(--teal) 20px,
-      var(--gold) 20px, var(--gold) 22px,
-      var(--red-seal) 22px, var(--red-seal) 42px,
-      var(--gold) 42px, var(--gold) 44px
-    );
-    opacity: 0.7;
-  }
-  .azulejo-pattern {
-    width: 100%;
-    height: 40px;
-    background:
-      repeating-linear-gradient(45deg, rgba(42,107,107,0.15) 0px, rgba(42,107,107,0.15) 4px, transparent 4px, transparent 12px),
-      repeating-linear-gradient(-45deg, rgba(139,26,26,0.1) 0px, rgba(139,26,26,0.1) 4px, transparent 4px, transparent 12px);
-  }
+/* ════════════════════════════════════
+   CASTLE / SECRET SCREEN
+════════════════════════════════════ */
+.night-bg {
+  background:linear-gradient(175deg,#0a0520 0%,#12063a 50%,#1a0a02 100%);
+  min-height:100vh;
+}
+.night-bg .page-wrap { background:transparent; }
+#stars-container { position:fixed;inset:0;pointer-events:none;z-index:0; }
+.star { position:absolute;background:#fff;border-radius:50%;animation:starTwinkle var(--dur,3s) ease-in-out infinite;animation-delay:var(--del,0s); }
+@keyframes starTwinkle { 0%,100%{opacity:0.15;transform:scale(1);}50%{opacity:0.9;transform:scale(1.5);} }
 
-  /* Gaudi theme */
-  .gaudi-mosaic {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 3px;
-    margin: 10px 0;
-    height: 60px;
-    overflow: hidden;
-    border-radius: 8px;
-    opacity: 0.7;
-  }
-  .mosaic-tile {
-    border-radius: 2px;
-    animation: mosaicShimmer 3s ease-in-out infinite;
-  }
-  @keyframes mosaicShimmer {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; }
-  }
-  .mosaic-tile:nth-child(1)  { background: #e74c3c; animation-delay: 0s; }
-  .mosaic-tile:nth-child(2)  { background: #f39c12; animation-delay: 0.1s; }
-  .mosaic-tile:nth-child(3)  { background: #27ae60; animation-delay: 0.2s; }
-  .mosaic-tile:nth-child(4)  { background: #2980b9; animation-delay: 0.3s; }
-  .mosaic-tile:nth-child(5)  { background: #8e44ad; animation-delay: 0.4s; }
-  .mosaic-tile:nth-child(6)  { background: #e74c3c; animation-delay: 0.5s; }
-  .mosaic-tile:nth-child(7)  { background: #f1c40f; animation-delay: 0.15s; }
-  .mosaic-tile:nth-child(8)  { background: #1abc9c; animation-delay: 0.25s; }
-  .mosaic-tile:nth-child(9)  { background: #e67e22; animation-delay: 0.35s; }
-  .mosaic-tile:nth-child(10) { background: #3498db; animation-delay: 0.45s; }
-  .mosaic-tile:nth-child(11) { background: #9b59b6; animation-delay: 0.55s; }
-  .mosaic-tile:nth-child(12) { background: #2ecc71; animation-delay: 0.05s; }
+.castle-hero-card {
+  margin:20px 20px 0;
+  background:linear-gradient(145deg,#1e0845 0%,#2d1060 60%,#1a0a00 100%);
+  border:1px solid rgba(255,210,63,0.2);
+  border-radius:28px;padding:28px 22px;
+  text-align:center;
+  box-shadow:0 16px 48px rgba(0,0,0,0.5),0 0 0 1px rgba(255,210,63,0.1);
+  position:relative;overflow:hidden;
+}
+.castle-hero-card::before {
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(255,210,63,0.08),transparent 70%);
+}
+.castle-emoji-big {
+  font-size:72px;display:block;margin-bottom:4px;
+  animation:castleReveal 0.9s cubic-bezier(0.34,1.56,0.64,1) both;
+  filter:drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+}
+@keyframes castleReveal { from{transform:scale(0.3) translateY(40px);opacity:0;}to{transform:scale(1);opacity:1;} }
 
-  /* Castle theme */
-  .castle-bg {
-    background: linear-gradient(180deg, #0d0d2b 0%, #1a1a3e 40%, #2d1a00 100%);
-  }
-  .castle-bg .frame { background: linear-gradient(180deg, #1a1a3e 0%, #2d1a00 100%); border-color: var(--gold); }
-  .castle-bg .body-text, .castle-bg .welcome-text { color: #e8d4a8; }
-  .castle-bg .stop-number, .castle-bg .welcome-subtitle { color: var(--gold-light); }
-  .castle-stars {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
-  .star {
-    position: absolute;
-    width: 2px; height: 2px;
-    background: white;
-    border-radius: 50%;
-    animation: starTwinkle 3s ease-in-out infinite;
-  }
-  @keyframes starTwinkle {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
-  }
+.chest-btn {
+  display:inline-flex;flex-direction:column;align-items:center;
+  gap:6px; cursor:pointer; margin:16px 0 8px;
+  transition:transform 0.2s ease;
+}
+.chest-btn:active { transform:scale(0.92); }
+.chest-emoji-big {
+  font-size:58px;
+  animation:chestAppear 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.5s both;
+  filter:drop-shadow(0 6px 20px rgba(0,0,0,0.5));
+  display:block;
+}
+@keyframes chestAppear { from{transform:scale(0) rotate(-15deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;} }
+.chest-tap-hint {
+  font-size:11px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:rgba(255,210,63,0.55);
+  animation:hintBlink 2.5s ease-in-out infinite;
+}
+@keyframes hintBlink { 0%,100%{opacity:0.5;}50%{opacity:1;} }
 
-  /* ─── FOOTER NOTE ─── */
-  .footer-note {
-    text-align: center;
-    font-size: 11px;
-    color: rgba(44,24,16,0.35);
-    font-style: italic;
-    margin-top: 12px;
-    padding: 0 20px;
-  }
+.castle-text {
+  font-size:16px;font-weight:400;line-height:1.9;
+  color:rgba(255,235,200,0.75);font-style:italic;
+  text-align:center;
+}
 
-  /* ─── PROGRESS BAR ─── */
-  .progress-track {
-    width: 100%;
-    height: 3px;
-    background: rgba(201,168,76,0.2);
-    margin-bottom: 6px;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
-    transition: width 1s ease;
-  }
+.secret-reveal {
+  display:none;
+  margin:16px 20px 0;
+  animation:revealIn 1s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes revealIn { from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);} }
+.secret-box {
+  background:linear-gradient(145deg,#1e0845,#2d1060);
+  border:1.5px solid rgba(255,210,63,0.35);
+  border-radius:24px;padding:28px 22px;text-align:center;
+  box-shadow:0 0 40px rgba(255,210,63,0.12),inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.secret-heart-row {
+  display:flex;justify-content:center;gap:6px;
+  margin-bottom:16px;
+}
+.secret-heart {
+  font-size:32px;
+  animation:heartBeat 1.4s ease-in-out infinite;
+  animation-delay:var(--del,0s);
+}
+@keyframes heartBeat { 0%,100%{transform:scale(1);}14%{transform:scale(1.25);}28%{transform:scale(1);}42%{transform:scale(1.18);}56%{transform:scale(1);} }
+.secret-title {
+  font-family:'Fraunces',serif;
+  font-size:26px;font-weight:700;font-style:italic;
+  color:var(--yellow-light);
+  text-shadow:0 0 30px rgba(255,210,63,0.5);
+  margin-bottom:14px;
+  animation:titleShimmer 3s ease-in-out infinite;
+}
+@keyframes titleShimmer { 0%,100%{text-shadow:0 0 20px rgba(255,210,63,0.4);}50%{text-shadow:0 0 40px rgba(255,210,63,0.9),0 0 80px rgba(255,210,63,0.3);} }
+.secret-msg {
+  font-size:17px;font-weight:400;line-height:1.9;
+  color:rgba(255,235,200,0.85);font-style:italic;
+}
+.secret-date {
+  margin-top:18px;padding-top:16px;
+  border-top:1px solid rgba(255,210,63,0.15);
+  font-size:10px;font-weight:700;letter-spacing:4px;
+  text-transform:uppercase;color:rgba(255,210,63,0.4);
+}
+
+/* ════════════════════════════════════
+   SLIDE-TO-UNLOCK BUTTON
+════════════════════════════════════ */
+.slide-wrap { padding:20px 20px 0; flex-shrink:0; }
+.slide-track {
+  position:relative;height:64px;
+  background:linear-gradient(135deg,var(--warm-100),var(--warm-200));
+  border-radius:32px;
+  border:2px solid var(--warm-200);
+  overflow:hidden;
+  box-shadow:0 2px 12px rgba(26,16,6,0.06),inset 0 1px 0 rgba(255,255,255,0.8);
+  user-select:none;
+}
+.slide-track.night-track {
+  background:linear-gradient(135deg,rgba(255,210,63,0.08),rgba(255,210,63,0.04));
+  border-color:rgba(255,210,63,0.2);
+  box-shadow:0 2px 20px rgba(0,0,0,0.3);
+}
+.slide-shimmer {
+  position:absolute;top:0;left:-100%;width:50%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);
+  animation:trackShimmer 2.5s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes trackShimmer { 0%{left:-50%;}100%{left:150%;} }
+.slide-label-wrap {
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding-left:72px;pointer-events:none;
+}
+.slide-label-text {
+  font-size:12px;font-weight:800;letter-spacing:2px;
+  text-transform:uppercase;color:var(--ink-muted);
+  transition:opacity 0.2s;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+  max-width:calc(100% - 90px);
+}
+.slide-track.night-track .slide-label-text { color:rgba(255,210,63,0.5); }
+.slide-chevrons {
+  position:absolute;right:16px;top:50%;
+  transform:translateY(-50%);
+  color:var(--warm-300);font-size:18px;
+  letter-spacing:-4px;pointer-events:none;
+  animation:chevAnim 1.8s ease-in-out infinite;
+}
+.slide-track.night-track .slide-chevrons { color:rgba(255,210,63,0.25); }
+@keyframes chevAnim { 0%,100%{opacity:0.4;}50%{opacity:0.9;} }
+.slide-handle {
+  position:absolute;top:7px;left:7px;
+  width:50px;height:50px;border-radius:25px;
+  background:linear-gradient(145deg,var(--orange-light),var(--orange),var(--orange-deep));
+  box-shadow:0 4px 14px rgba(255,107,53,0.5),inset 0 1px 0 rgba(255,255,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;cursor:grab;z-index:10;
+  touch-action:none;will-change:left;
+  transition:box-shadow 0.2s;
+}
+.slide-handle:active { cursor:grabbing; }
+.slide-handle.done {
+  background:linear-gradient(145deg,#81C784,#4CAF50,#2E7D32);
+  box-shadow:0 4px 14px rgba(76,175,80,0.5);
+}
+.slide-track.night-track .slide-handle {
+  background:linear-gradient(145deg,var(--yellow-light),var(--yellow),var(--yellow-deep));
+  box-shadow:0 4px 14px rgba(255,210,63,0.5);
+}
+
+/* ════════════════════════════════════
+   CONFETTI
+════════════════════════════════════ */
+#confetti-canvas { position:fixed;inset:0;pointer-events:none;z-index:9999; }
+
+/* ════════════════════════════════════
+   MICRO-ANIMATIONS
+════════════════════════════════════ */
+.fade-in-up {
+  animation:fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  animation-delay:var(--del,0s);
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+
+/* Scroll padding at bottom */
+.scroll-pad { height:24px;flex-shrink:0; }
 </style>
 </head>
 <body>
 
 <canvas id="confetti-canvas"></canvas>
+<div id="stars-container"></div>
 
-<!-- ════════════════════════════════════════════
-     SCREEN 0: WELCOME
-════════════════════════════════════════════ -->
-<div id="screen-0" class="screen parchment-bg active">
-  <div class="frame parchment-bg" style="margin-top:20px;">
-    <div style="text-align:center; padding: 28px 20px 0;">
-      <div class="compass">🧭</div>
-      <div class="welcome-title">Anna</div>
-      <div class="welcome-subtitle">· El teu regal especial ·</div>
-    </div>
+<!-- Floating particles (added by JS) -->
+<div id="particles-wrap"></div>
 
-    <div class="divider"><span class="divider-icon">⚜</span></div>
-
-    <div class="content-area" style="padding-top:0;">
-      <div class="welcome-text">
-        Hola mi amor, t'he fet això per tu perquè a mi les manualitats no se'm donen gaire bé, algun dia prometo fer-te algo amb les mans però espero que t'encanti igualment el dia d'avui. T'estimo moltíssim.
-      </div>
-
-      <div class="divider" style="margin-top:24px;"><span class="divider-icon">✦</span></div>
-
-      <div style="text-align:center; margin: 8px 0 4px;">
-        <div class="wax-seal">🗺</div>
-        <p style="font-family:'Cinzel',serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--gold-dark); margin-bottom:4px;">21 · III · MMXXV</p>
-        <p style="font-size:14px; color:var(--ink-light); font-style:italic;">Tres parades. Un tresor. Una aventura.</p>
-      </div>
-    </div>
-
-    <div class="slider-btn-wrap" data-target="screen-1" data-save="started">
-      <div class="slider-btn-track"><span class="slider-btn-label">Llisca per Començar</span></div>
-      <div class="slider-btn-arrows">›› </div>
-      <div class="slider-btn-handle" data-handle>🧭</div>
-    </div>
-    <p class="footer-note" style="padding-bottom:20px;">Llisca el botó fins al final →</p>
+<!-- ╔══════════════════════════╗
+     ║  S0 · BENVINGUDA         ║
+     ╚══════════════════════════╝ -->
+<section class="screen" id="s0">
+  <div class="screen-bg">
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
   </div>
-</div>
+  <div class="page-wrap">
 
-<!-- ════════════════════════════════════════════
-     SCREEN 1: TORNO CERÀMIC
-════════════════════════════════════════════ -->
-<div id="screen-1" class="screen parchment-bg">
-  <div class="frame parchment-bg" style="margin-top:20px; position:relative; overflow:visible;">
-    <span class="clay-handprints">🤲</span>
-
-    <div class="header-band">
-      <div class="stop-number">Parada 1 de 3</div>
-      <div class="stop-title">Torno Ceràmic 🏺</div>
+    <div class="top-bar fade-in-up" style="--del:0s">
+      <span class="top-bar-logo">Anna 🧡</span>
+      <span class="top-bar-date">21 · III · 2025</span>
     </div>
 
-    <div class="map-route" style="padding: 12px 0 0;">
-      <div class="route-dot done"></div><div class="route-line"></div>
-      <div class="route-dot active"></div><div class="route-line"></div>
-      <div class="route-dot"></div><div class="route-line"></div>
-      <div class="route-dot"></div>
-    </div>
-    <div class="progress-track"><div class="progress-fill" style="width:25%"></div></div>
-
-    <div class="content-area">
-      <div class="icon-badge">🏺</div>
-
-      <div class="scoring-label">— Puntua les categories del 1 al 10 —</div>
-
-      <div id="scores-1"></div>
-    </div>
-
-    <div class="slider-btn-wrap" data-target="screen-2" data-save="stop1">
-      <div class="slider-btn-track"><span class="slider-btn-label">Confirmar i Continuar</span></div>
-      <div class="slider-btn-arrows">›› </div>
-      <div class="slider-btn-handle" data-handle>🏺</div>
-    </div>
-    <p class="footer-note" style="padding-bottom:20px;">Les puntuacions es guardaran automàticament</p>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     SCREEN 2: TAPES LA BONA SORT
-════════════════════════════════════════════ -->
-<div id="screen-2" class="screen parchment-bg">
-  <div class="frame parchment-bg" style="margin-top:20px;">
-
-    <div class="tapas-tile"></div>
-    <div class="header-band">
-      <div class="stop-number">Parada 2 de 3</div>
-      <div class="stop-title">Tapes la Bona Sort 🍽</div>
-    </div>
-    <div class="tapas-tile"></div>
-    <div class="azulejo-pattern"></div>
-
-    <div class="map-route" style="padding: 12px 0 0;">
-      <div class="route-dot done"></div><div class="route-line"></div>
-      <div class="route-dot done"></div><div class="route-line"></div>
-      <div class="route-dot active"></div><div class="route-line"></div>
-      <div class="route-dot"></div>
-    </div>
-    <div class="progress-track"><div class="progress-fill" style="width:50%"></div></div>
-
-    <div class="content-area">
-      <div class="icon-badge">🍢</div>
-
-      <div class="welcome-text">
-        Honestament, m'ha costat una mica trobar un restaurant per anar avui, però he triat Tapes la Bona Sort perquè junta la cuina tradicional que sé que a tu t'agrada molt amb les tapes que crec que als 2 ens encanten i espero que ens vinguin realment de gust quan estiguis llegint això :)
+    <!-- Hero -->
+    <div class="hero-card fade-in-up" style="--del:0.1s">
+      <div class="hero-emoji-row">
+        <span class="hero-main-emoji">🧭</span>
+        <span class="hero-badge">Dia especial</span>
       </div>
+      <div class="hero-name">Hola, Anna!</div>
+      <div class="hero-sub">Avui et tinc preparada una aventura molt especial… 🌟</div>
+      <div class="hero-stars">
+        <span class="hero-star" style="--dur:1.8s;--del:0s">⭐</span>
+        <span class="hero-star" style="--dur:2.2s;--del:0.3s">✨</span>
+        <span class="hero-star" style="--dur:1.6s;--del:0.6s">⭐</span>
+      </div>
+    </div>
 
-      <div class="divider"><span class="divider-icon">🫒</span></div>
+    <!-- Letter -->
+    <div class="fade-in-up" style="--del:0.2s; padding: 0 20px;">
+      <p class="letter-body">
+        Hola mi amor, t'he fet això per tu perquè a mi les manualitats no se'm donen gaire bé. Algun dia prometo fer-te algo amb les mans però espero que t'encanti igualment el dia d'avui. <em>T'estimo moltíssim.</em>
+      </p>
+    </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px;">
-        <div style="background:rgba(42,107,107,0.08); border:1px solid rgba(42,107,107,0.3); border-radius:8px; padding:12px; text-align:center;">
-          <div style="font-size:24px; margin-bottom:6px;">🥘</div>
-          <div style="font-family:'Cinzel',serif; font-size:11px; color:var(--teal); letter-spacing:1px;">Cuina tradicional</div>
+    <!-- Route section -->
+    <div class="section-label fade-in-up" style="--del:0.3s">
+      <span>🗺</span> La teva aventura
+    </div>
+
+    <!-- Route map — only stop 1 visible at start -->
+    <div class="route-map fade-in-up" id="route-map" style="--del:0.35s">
+      <!-- Built by JS -->
+    </div>
+
+    <div class="doodle-row fade-in-up" style="--del:0.4s">
+      <div class="doodle-line"></div>
+      <div class="doodle-diamond"></div>
+      <div class="doodle-dot"></div>
+      <div class="doodle-diamond"></div>
+      <div class="doodle-line"></div>
+    </div>
+
+    <div class="scroll-pad"></div>
+
+    <div class="slide-wrap fade-in-up" style="--del:0.45s">
+      <div class="slide-track" data-goto="s1">
+        <div class="slide-shimmer"></div>
+        <div class="slide-label-wrap"><span class="slide-label-text">Llisca per Començar ✨</span></div>
+        <div class="slide-chevrons">>>></div>
+        <div class="slide-handle" data-handle>🧭</div>
+      </div>
+    </div>
+    <div class="scroll-pad"></div>
+
+  </div>
+</section>
+
+<!-- ╔══════════════════════════╗
+     ║  S1 · TORNO CERÀMIC      ║
+     ╚══════════════════════════╝ -->
+<section class="screen" id="s1">
+  <div class="screen-bg">
+    <div class="bg-blob blob-1" style="background:#FFD5C2;"></div>
+    <div class="bg-blob blob-2" style="background:#FFF3E8;"></div>
+  </div>
+  <div class="page-wrap">
+    <div class="top-bar">
+      <span class="top-bar-logo">Parada 1 🏺</span>
+      <span class="top-bar-date">Torno Ceràmic</span>
+    </div>
+
+    <div class="screen-header fade-in-up">
+      <div class="screen-header-icon" style="background:linear-gradient(145deg,var(--orange-pale),var(--yellow-pale));">🏺</div>
+      <div class="screen-header-info">
+        <div class="screen-header-eyebrow">Parada 1 de 3</div>
+        <div class="screen-header-title">Torno Ceràmic</div>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap fade-in-up" style="--del:0.05s">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:25%"></div></div>
+      <span class="progress-label">25%</span>
+    </div>
+
+    <div class="card fade-in-up" style="--del:0.1s">
+      <div class="card-top-accent" style="background:linear-gradient(90deg,var(--orange),var(--coral),var(--yellow))"></div>
+      <div class="card-title"><span class="card-title-dot"></span>Puntua del 1 al 10</div>
+      <div id="scores-s1"></div>
+    </div>
+
+    <div class="doodle-row fade-in-up" style="--del:0.15s">
+      <div class="doodle-line"></div>
+      <div class="doodle-dot"></div><div class="doodle-diamond"></div><div class="doodle-dot"></div>
+      <div class="doodle-line"></div>
+    </div>
+    <div class="scroll-pad"></div>
+
+    <div class="slide-wrap fade-in-up" style="--del:0.2s">
+      <div class="slide-track" data-goto="s2" data-savekey="s1">
+        <div class="slide-shimmer"></div>
+        <div class="slide-label-wrap"><span class="slide-label-text">Confirmar i anar a la Parada 2</span></div>
+        <div class="slide-chevrons">>>></div>
+        <div class="slide-handle" data-handle>🏺</div>
+      </div>
+    </div>
+    <div class="scroll-pad"></div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════╗
+     ║  S2 · TAPES LA BONA SORT ║
+     ╚══════════════════════════╝ -->
+<section class="screen" id="s2">
+  <div class="screen-bg">
+    <div class="bg-blob blob-1" style="background:#FFE8D0;"></div>
+    <div class="bg-blob blob-2" style="background:#FFF8DC;"></div>
+  </div>
+  <div class="page-wrap">
+    <div class="tile-strip"></div>
+    <div class="top-bar">
+      <span class="top-bar-logo">Parada 2 🍢</span>
+      <span class="top-bar-date">Tapes</span>
+    </div>
+
+    <div class="screen-header fade-in-up">
+      <div class="screen-header-icon" style="background:linear-gradient(145deg,var(--yellow-pale),var(--orange-pale));">🍢</div>
+      <div class="screen-header-info">
+        <div class="screen-header-eyebrow">Parada 2 de 3</div>
+        <div class="screen-header-title">Tapes la Bona Sort</div>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap fade-in-up" style="--del:0.05s">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:50%"></div></div>
+      <span class="progress-label">50%</span>
+    </div>
+
+    <div class="info-card fade-in-up" style="--del:0.1s">
+      <div class="info-card-label">💬 Una parada especial</div>
+      <p class="info-card-text">Honestament, m'ha costat una mica trobar un restaurant per anar avui, però he triat Tapes la Bona Sort perquè junta la cuina tradicional que sé que a tu t'agrada molt amb les tapes que crec que als 2 ens encanten i espero que ens vinguin realment de gust quan estiguis llegint això :)</p>
+    </div>
+
+    <div class="restaurant-deco fade-in-up" style="--del:0.15s">
+      <div class="resto-item warm"><span class="resto-item-icon" style="--del:0s">🥘</span><span class="resto-item-label">Cuina tradicional</span></div>
+      <div class="resto-item sunny"><span class="resto-item-icon" style="--del:0.5s">🍷</span><span class="resto-item-label">Tapes i vi</span></div>
+      <div class="resto-item sunny"><span class="resto-item-icon" style="--del:1s">🫒</span><span class="resto-item-label">Productes frescos</span></div>
+      <div class="resto-item warm"><span class="resto-item-icon" style="--del:1.5s">🕯</span><span class="resto-item-label">Ambient íntim</span></div>
+    </div>
+
+    <div class="doodle-row fade-in-up" style="--del:0.2s">
+      <div class="doodle-line"></div>
+      <div class="doodle-diamond"></div><div class="doodle-dot"></div><div class="doodle-diamond"></div>
+      <div class="doodle-line"></div>
+    </div>
+
+    <div class="tile-strip" style="margin-top:auto;"></div>
+    <div class="scroll-pad"></div>
+
+    <div class="slide-wrap fade-in-up" style="--del:0.25s">
+      <div class="slide-track" data-goto="s3" data-savekey="s2">
+        <div class="slide-shimmer"></div>
+        <div class="slide-label-wrap"><span class="slide-label-text">Continuar l'aventura 🍽</span></div>
+        <div class="slide-chevrons">>>></div>
+        <div class="slide-handle" data-handle>🍢</div>
+      </div>
+    </div>
+    <div class="scroll-pad"></div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════╗
+     ║  S3 · ESCAPE ROOM GAUDÍ  ║
+     ╚══════════════════════════╝ -->
+<section class="screen" id="s3">
+  <div class="screen-bg">
+    <div class="bg-blob blob-1" style="background:#FFD5C2;"></div>
+    <div class="bg-blob blob-2" style="background:#FFF3E8;"></div>
+    <div class="bg-blob blob-3" style="background:#FFE8D0;"></div>
+  </div>
+  <div class="page-wrap">
+    <div class="top-bar">
+      <span class="top-bar-logo">Parada 3 🔐</span>
+      <span class="top-bar-date">Escape Room</span>
+    </div>
+
+    <div class="gaudi-wrap fade-in-up">
+      <div class="gaudi-mosaic" id="gaudi-mosaic"></div>
+    </div>
+
+    <div class="screen-header fade-in-up" style="--del:0.05s">
+      <div class="screen-header-icon" style="background:linear-gradient(145deg,var(--yellow-pale),var(--orange-pale));">🔐</div>
+      <div class="screen-header-info">
+        <div class="screen-header-eyebrow">Parada 3 de 3</div>
+        <div class="screen-header-title">Escape Room Gaudí</div>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap fade-in-up" style="--del:0.1s">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:75%"></div></div>
+      <span class="progress-label">75%</span>
+    </div>
+
+    <div class="card fade-in-up" style="--del:0.15s">
+      <div class="card-top-accent" style="background:linear-gradient(90deg,var(--yellow),var(--orange),var(--coral))"></div>
+      <div class="card-title"><span class="card-title-dot"></span>L'última batalla</div>
+      <div id="scores-s3"></div>
+    </div>
+
+    <div class="doodle-row fade-in-up" style="--del:0.2s">
+      <div class="doodle-line"></div>
+      <div class="doodle-dot"></div><div class="doodle-diamond"></div><div class="doodle-dot"></div>
+      <div class="doodle-line"></div>
+    </div>
+    <div class="scroll-pad"></div>
+
+    <div class="slide-wrap fade-in-up" style="--del:0.25s">
+      <div class="slide-track" data-goto="s4" data-savekey="s3">
+        <div class="slide-shimmer"></div>
+        <div class="slide-label-wrap"><span class="slide-label-text">Veure els Resultats Finals 🏆</span></div>
+        <div class="slide-chevrons">>>></div>
+        <div class="slide-handle" data-handle>🔐</div>
+      </div>
+    </div>
+    <div class="scroll-pad"></div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════╗
+     ║  S4 · RESULTATS          ║
+     ╚══════════════════════════╝ -->
+<section class="screen" id="s4">
+  <div class="screen-bg">
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+  </div>
+  <div class="page-wrap">
+    <div class="top-bar">
+      <span class="top-bar-logo">Resultats 🏆</span>
+      <span class="top-bar-date">Veredicte final</span>
+    </div>
+
+    <div class="winner-card fade-in-up">
+      <span class="winner-emoji" id="winner-emoji">🏆</span>
+      <div class="winner-tag">Campió global</div>
+      <div class="winner-name" id="winner-name">—</div>
+    </div>
+
+    <div class="scores-table-card fade-in-up" style="--del:0.15s">
+      <table class="scores-tbl" id="scores-table">
+        <thead>
+          <tr><th>Categoria</th><th style="color:#2e7d32;">Alex</th><th style="color:var(--orange);">Anna</th></tr>
+        </thead>
+        <tbody id="scores-tbody"></tbody>
+        <tfoot id="scores-tfoot"></tfoot>
+      </table>
+    </div>
+
+    <div class="doodle-row fade-in-up" style="--del:0.2s">
+      <div class="doodle-line"></div>
+      <div class="doodle-diamond"></div><div class="doodle-dot"></div><div class="doodle-diamond"></div>
+      <div class="doodle-line"></div>
+    </div>
+    <div class="scroll-pad"></div>
+
+    <div class="slide-wrap fade-in-up" style="--del:0.25s">
+      <div class="slide-track" data-goto="s5" data-savekey="s4">
+        <div class="slide-shimmer"></div>
+        <div class="slide-label-wrap"><span class="slide-label-text">Descobrir l'Últim Secret ✨</span></div>
+        <div class="slide-chevrons">>>></div>
+        <div class="slide-handle" data-handle>🏆</div>
+      </div>
+    </div>
+    <div class="scroll-pad"></div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════╗
+     ║  S5 · CASTELL SECRET     ║
+     ╚══════════════════════════╝ -->
+<section class="screen night-bg" id="s5">
+  <div class="page-wrap" style="position:relative;z-index:2;">
+
+    <div class="top-bar">
+      <span class="top-bar-logo" style="color:var(--yellow-light);-webkit-text-fill-color:var(--yellow-light);">El Castell 🏰</span>
+      <span class="top-bar-date" style="color:rgba(255,210,63,0.45);">La casella secreta</span>
+    </div>
+
+    <div class="castle-hero-card fade-in-up">
+      <span class="castle-emoji-big">🏰</span>
+      <div class="chest-btn" onclick="openChest()" id="chest-btn">
+        <span class="chest-emoji-big" id="chest-emoji">🔒</span>
+        <span class="chest-tap-hint" id="chest-hint">Toca per obrir el tresor</span>
+      </div>
+      <p class="castle-text">Enhorabona, has arribat al final del teu regal, espero que t'ho hagis passat super bé amb mi, i ara només queda un petit detallet...</p>
+    </div>
+
+    <div class="secret-reveal" id="secret-reveal">
+      <div class="secret-box">
+        <div class="secret-heart-row">
+          <span class="secret-heart" style="--del:0s">💛</span>
+          <span class="secret-heart" style="--del:0.2s">🧡</span>
+          <span class="secret-heart" style="--del:0.4s">💛</span>
         </div>
-        <div style="background:rgba(139,26,26,0.08); border:1px solid rgba(139,26,26,0.3); border-radius:8px; padding:12px; text-align:center;">
-          <div style="font-size:24px; margin-bottom:6px;">🍷</div>
-          <div style="font-family:'Cinzel',serif; font-size:11px; color:var(--red-seal); letter-spacing:1px;">Tapes i bon vi</div>
-        </div>
+        <div class="secret-title">Feliç Aniversari, Anna! 🌹</div>
+        <p class="secret-msg">Gràcies per fer cada dia una petita aventura.<br><br>T'estimo moltíssim ✨</p>
+        <div class="secret-date">· 21 de Març de 2025 ·</div>
       </div>
     </div>
 
-    <div class="slider-btn-wrap" data-target="screen-3" data-save="stop2">
-      <div class="slider-btn-track"><span class="slider-btn-label">Continuar l'Aventura</span></div>
-      <div class="slider-btn-arrows">›› </div>
-      <div class="slider-btn-handle" data-handle>🍽</div>
+    <div style="text-align:center;padding:20px 0 8px;flex-shrink:0;position:relative;z-index:2;">
+      <span style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(255,210,63,0.25);">Fet amb molt d'amor 💛</span>
     </div>
-    <p class="footer-note" style="padding-bottom:20px;">Bon profit! 🍴</p>
+    <div class="scroll-pad"></div>
   </div>
-</div>
+</section>
 
-<!-- ════════════════════════════════════════════
-     SCREEN 3: ESCAPE ROOM GAUDÍ
-════════════════════════════════════════════ -->
-<div id="screen-3" class="screen parchment-bg">
-  <div class="frame parchment-bg" style="margin-top:20px;">
-
-    <div class="header-band">
-      <div class="stop-number">Parada 3 de 3</div>
-      <div class="stop-title">Escape Room Gaudí 🔍</div>
-    </div>
-
-    <div class="gaudi-mosaic">
-      <div class="mosaic-tile"></div><div class="mosaic-tile"></div><div class="mosaic-tile"></div>
-      <div class="mosaic-tile"></div><div class="mosaic-tile"></div><div class="mosaic-tile"></div>
-      <div class="mosaic-tile"></div><div class="mosaic-tile"></div><div class="mosaic-tile"></div>
-      <div class="mosaic-tile"></div><div class="mosaic-tile"></div><div class="mosaic-tile"></div>
-    </div>
-
-    <div class="map-route" style="padding: 8px 0 0;">
-      <div class="route-dot done"></div><div class="route-line"></div>
-      <div class="route-dot done"></div><div class="route-line"></div>
-      <div class="route-dot done"></div><div class="route-line"></div>
-      <div class="route-dot active"></div>
-    </div>
-    <div class="progress-track"><div class="progress-fill" style="width:75%"></div></div>
-
-    <div class="content-area">
-      <div class="icon-badge">🔐</div>
-      <div class="scoring-label">— L'última competició —</div>
-      <div id="scores-3"></div>
-    </div>
-
-    <div class="slider-btn-wrap" data-target="screen-4" data-save="stop3">
-      <div class="slider-btn-track"><span class="slider-btn-label">Veure Resultats Finals</span></div>
-      <div class="slider-btn-arrows">›› </div>
-      <div class="slider-btn-handle" data-handle>🔐</div>
-    </div>
-    <p class="footer-note" style="padding-bottom:20px;">Qui haurà guanyat...?</p>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     SCREEN 4: RESULTS
-════════════════════════════════════════════ -->
-<div id="screen-4" class="screen parchment-bg">
-  <div class="frame parchment-bg" style="margin-top:20px;">
-
-    <div class="header-band">
-      <div class="stop-number">· Resultats Finals ·</div>
-      <div class="stop-title">La Taula del Veredicte 🏆</div>
-    </div>
-
-    <div class="content-area">
-      <div class="icon-badge">🏆</div>
-      <div id="results-content"></div>
-    </div>
-
-    <div class="slider-btn-wrap" data-target="screen-5" data-save="results">
-      <div class="slider-btn-track"><span class="slider-btn-label">Descobrir el Secret Final</span></div>
-      <div class="slider-btn-arrows">›› </div>
-      <div class="slider-btn-handle" data-handle>🏆</div>
-    </div>
-    <p class="footer-note" style="padding-bottom:20px;">L'últim detall t'espera...</p>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     SCREEN 5: SECRET CASTLE
-════════════════════════════════════════════ -->
-<div id="screen-5" class="screen castle-bg">
-  <div class="castle-stars" id="stars-container"></div>
-  <div class="frame" style="margin-top:20px; background: rgba(13,13,43,0.85); border-color:var(--gold);">
-
-    <div class="header-band" style="background: linear-gradient(135deg, #0d0d2b, #1a1a3e);">
-      <div class="stop-number" style="color:var(--gold-light);">· La Casella Secreta ·</div>
-      <div class="stop-title" style="color:var(--gold-light);">El Castell 🏰</div>
-    </div>
-
-    <div class="content-area">
-      <div class="castle-art">🏰</div>
-      <div id="treasure-chest" class="treasure-chest" onclick="openChest()">🔒</div>
-      <div id="chest-msg" style="text-align:center; font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px; color:var(--gold-dark); opacity:0.7; margin-bottom:16px;">Toca el cofre per obrir-lo</div>
-
-      <div class="divider"><span class="divider-icon" style="color:var(--gold);">✦</span></div>
-
-      <div class="welcome-text" style="color:#e8d4a8;">
-        Enhorabona, has arribat al final del teu regal, espero que t'ho hagis passat super bé amb mi, i ara només queda un petit detallet...
-      </div>
-
-      <div id="secret-reveal" style="display:none; text-align:center; margin-top:20px; animation: fadeIn 1s ease forwards;">
-        <div style="background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05)); border:2px solid var(--gold); border-radius:12px; padding:20px;">
-          <div style="font-size:36px; margin-bottom:10px;">💌</div>
-          <div style="font-family:'Cinzel Decorative',serif; font-size:18px; color:var(--gold-light); margin-bottom:10px; text-shadow: 0 0 20px rgba(201,168,76,0.5);">Feliç Aniversari, Anna!</div>
-          <div style="font-size:15px; color:#e8d4a8; font-style:italic; line-height:1.8;">
-            Gràcies per fer cada dia una petita aventura.<br>T'estimo 🌹
-          </div>
-        </div>
-        <div style="margin-top:16px; font-size:11px; font-family:'Cinzel',serif; letter-spacing:2px; color:var(--gold-dark); text-transform:uppercase;">
-          · 21 de Març de 2025 ·
-        </div>
-      </div>
-    </div>
-
-    <p class="footer-note" style="padding-bottom:24px; color:rgba(232,208,138,0.4);">Fet amb molt d'amor 💛</p>
-  </div>
-</div>
-
+<!-- ══════════════════════════════
+     JAVASCRIPT
+══════════════════════════════ -->
 <script>
-// ════════════════════════════════
-// DATA & CATEGORIES
-// ════════════════════════════════
-const CAT1 = [
-  { id:'c1_1', icon:'🎨', name:'Habilitat Tècnica' },
-  { id:'c1_2', icon:'💥', name:'Nivell de Desastre' },
-  { id:'c1_3', icon:'🏆', name:'Resultat Final' },
-  { id:'c1_4', icon:'✨', name:'Creativitat' },
-  { id:'c1_5', icon:'🧘', name:'Actitud / Paciència' },
-];
-const CAT3 = [
-  { id:'c3_1', icon:'🦅', name:"Ull de Linx / Cerca" },
-  { id:'c3_2', icon:'🧠', name:'Cervell / Lògica' },
-  { id:'c3_3', icon:'🤝', name:'Treball en Equip' },
+'use strict';
+
+/* ── CATEGORIES ── */
+const CATS = {
+  s1:[
+    {id:'s1_tech',    icon:'🎨', name:'Habilitat Tècnica'},
+    {id:'s1_disaster',icon:'💥', name:'Nivell de Desastre'},
+    {id:'s1_result',  icon:'🏆', name:'Resultat Final de la Peça'},
+    {id:'s1_creative',icon:'✨', name:'Creativitat / Toc Artístic'},
+    {id:'s1_patience',icon:'🧘', name:'Actitud / Paciència'},
+  ],
+  s3:[
+    {id:'s3_eye',  icon:'🦅', name:"Ull de Linx / Cerca"},
+    {id:'s3_brain',icon:'🧠', name:'Cervell / Lògica'},
+    {id:'s3_team', icon:'🤝', name:'Treball en Equip'},
+  ]
+};
+
+/* ── ROUTE STOPS (for the home screen map) ── */
+const STOPS = [
+  {id:'stop1', emoji:'🏺', name:'Torno Ceràmic',       desc:'Crea la teva obra mestra 🎨'},
+  {id:'stop2', emoji:'🍢', name:'Tapes la Bona Sort',  desc:'Menjar i celebrar 🥂'},
+  {id:'stop3', emoji:'🔐', name:'Escape Room Gaudí',   desc:'Pensa ràpid i escapa! 🔓'},
 ];
 
-let state = JSON.parse(localStorage.getItem('treasureState') || '{}');
+/* ── STATE — scores only ── */
+function loadScores(){
+  try{ const r=localStorage.getItem('tm_v4'); if(r) return JSON.parse(r); }catch(e){}
+  return {s1:{},s3:{},unlockedStops:0};
+}
+function saveScores(sc){ try{ localStorage.setItem('tm_v4',JSON.stringify(sc)); }catch(e){} }
+let SC = loadScores();
+if(!SC.unlockedStops) SC.unlockedStops = 0;
 
-function save() {
-  localStorage.setItem('treasureState', JSON.stringify(state));
+/* ── SCREEN ── */
+let curId = 's0';
+function goTo(id){
+  document.getElementById(curId).classList.remove('screen--active');
+  const nxt = document.getElementById(id);
+  nxt.classList.add('screen--active');
+  curId = id;
+  window.scrollTo(0,0);
+
+  // Side effects
+  if(id==='s1') { SC.unlockedStops = Math.max(SC.unlockedStops,1); saveScores(SC); updateRouteMap(); }
+  if(id==='s2') { SC.unlockedStops = Math.max(SC.unlockedStops,2); saveScores(SC); }
+  if(id==='s3') { SC.unlockedStops = Math.max(SC.unlockedStops,3); saveScores(SC); }
+  if(id==='s4') buildResults();
+  if(id==='s5') initCastle();
 }
 
-// ════════════════════════════════
-// RENDER SCORE CATEGORIES
-// ════════════════════════════════
-function renderScores(containerId, cats, stateKey) {
-  const wrap = document.getElementById(containerId);
-  if (!wrap) return;
-  if (!state[stateKey]) state[stateKey] = {};
-
+/* ── ROUTE MAP — shows stops progressively ── */
+function buildRouteMap(){
+  const wrap = document.getElementById('route-map');
+  if(!wrap) return;
+  const ul = SC.unlockedStops; // 0=none, 1=stop1 done, etc.
   let html = '';
-  cats.forEach(cat => {
-    const aVal = state[stateKey][cat.id+'_alex'] ?? 5;
-    const nVal = state[stateKey][cat.id+'_anna'] ?? 5;
-    html += `
-    <div class="score-category">
-      <div class="cat-name"><span class="cat-icon">${cat.icon}</span>${cat.name}</div>
-      <div class="score-row">
-        <div>
-          <div class="score-name alex">Alex</div>
-          <div class="score-val alex" id="v_${cat.id}_alex">${aVal}</div>
-        </div>
-        <div>
-          <input type="range" min="1" max="10" value="${aVal}"
-            oninput="updateScore('${stateKey}','${cat.id}','alex',this.value)"
-            style="width:100%; margin-bottom:6px;">
-          <input type="range" min="1" max="10" value="${nVal}"
-            oninput="updateScore('${stateKey}','${cat.id}','anna',this.value)">
-        </div>
-        <div>
-          <div class="score-name anna">Anna</div>
-          <div class="score-val anna" id="v_${cat.id}_anna">${nVal}</div>
-        </div>
+  STOPS.forEach((stop, i) => {
+    const idx = i; // 0-based
+    const done   = ul > idx+1; // completed = moved past this stop
+    const active = ul === idx; // currently at this stop (0=about to start 1st)
+    const locked = ul < idx;   // not yet shown
+
+    // Only show: done, active-next, and one locked peek
+    if(locked && ul < idx-1) {
+      // Hidden beyond next locked — don't render at all
+      return;
+    }
+
+    const statusIcon = done ? '✓' : active ? '▶' : '🔒';
+    const stopClass  = done ? 'unlocked' : active ? 'active-stop' : 'locked';
+
+    if(idx > 0 && !locked){
+      html += `<div class="stop-connector${done?'' : ''}"></div>`;
+    } else if(idx > 0 && ul >= idx-1){
+      html += `<div class="stop-connector"></div>`;
+    }
+
+    html += `<div class="route-stop ${stopClass}">
+      <div class="stop-icon-wrap">${stop.emoji}</div>
+      <div class="stop-info">
+        <div class="stop-name">${locked ? '???' : stop.name}</div>
+        <div class="stop-desc">${locked ? 'Pendent de desbloquejar...' : stop.desc}</div>
       </div>
+      <div class="stop-status">${statusIcon}</div>
     </div>`;
   });
   wrap.innerHTML = html;
 }
 
-function updateScore(stateKey, catId, player, val) {
-  if (!state[stateKey]) state[stateKey] = {};
-  state[stateKey][catId+'_'+player] = parseInt(val);
-  const el = document.getElementById(`v_${catId}_${player}`);
-  if (el) el.textContent = val;
-  save();
-}
+function updateRouteMap(){ buildRouteMap(); }
 
-// ════════════════════════════════
-// RESULTS
-// ════════════════════════════════
-function renderResults() {
-  const wrap = document.getElementById('results-content');
-  if (!wrap) return;
-
-  const s1 = state.stop1 || {};
-  const s3 = state.stop3 || {};
-
-  let alexTotal = 0, annaTotal = 0;
-  let rows = '';
-
-  const allCats = [
-    { cats: CAT1, label: '🏺 Torno', key: 's1', data: s1 },
-    { cats: CAT3, label: '🔐 Escape', key: 's3', data: s3 },
-  ];
-
-  allCats.forEach(group => {
-    rows += `<div class="results-row"><span colspan="3" style="color:var(--gold-dark); font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px; text-align:left; grid-column:1/-1;">${group.label}</span></div>`;
-    group.cats.forEach(cat => {
-      const a = group.data[cat.id+'_alex'] ?? 5;
-      const n = group.data[cat.id+'_anna'] ?? 5;
-      alexTotal += a; annaTotal += n;
-      rows += `<div class="results-row">
-        <span>${cat.icon} ${cat.name}</span>
-        <span class="s-alex">${a}</span>
-        <span class="s-anna">${n}</span>
-      </div>`;
-    });
-  });
-
-  const winner = alexTotal > annaTotal ? 'Alex' : annaTotal > alexTotal ? 'Anna' : 'Empat!';
-  const winnerEmoji = winner === 'Alex' ? '🧭' : winner === 'Anna' ? '👑' : '🤝';
-
-  wrap.innerHTML = `
-    <div class="winner-banner">
-      <div class="winner-label">Campió Global</div>
-      <div class="winner-name">${winnerEmoji} ${winner} ${winnerEmoji}</div>
-    </div>
-    <div class="results-card">
-      <div class="results-header">
-        <span>Categoria</span>
-        <span style="color:var(--teal);">Alex</span>
-        <span style="color:var(--red-seal);">Anna</span>
+/* ── SCORE RENDERING ── */
+function renderScores(containerId, key){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  if(!SC[key]) SC[key]={};
+  el.innerHTML = CATS[key].map(cat=>{
+    const a = SC[key][cat.id+'_alex'] ?? 5;
+    const n = SC[key][cat.id+'_anna'] ?? 5;
+    const aPct = ((a-1)/9*100).toFixed(1);
+    const nPct = ((n-1)/9*100).toFixed(1);
+    return `<div class="score-block">
+      <div class="score-cat-row">
+        <span class="score-cat-emoji">${cat.icon}</span>
+        <span class="score-cat-name">${cat.name}</span>
       </div>
-      ${rows}
-      <div class="results-total">
-        <span class="label">Total</span>
-        <span class="t-alex">${alexTotal}</span>
-        <span class="t-anna">${annaTotal}</span>
+      <div class="score-players-grid">
+        <div class="player-col">
+          <span class="player-chip alex">Alex</span>
+          <span class="player-num alex" id="pv_${cat.id}_alex">${a}</span>
+          <input type="range" class="r-alex" min="1" max="10" value="${a}"
+            style="background:linear-gradient(90deg,#2e7d32 ${aPct}%,rgba(46,125,50,0.15) ${aPct}%)"
+            oninput="onScore('${key}','${cat.id}','alex',this)">
+        </div>
+        <div class="player-col">
+          <span class="player-chip anna">Anna</span>
+          <span class="player-num anna" id="pv_${cat.id}_anna">${n}</span>
+          <input type="range" class="r-anna" min="1" max="10" value="${n}"
+            style="background:linear-gradient(90deg,var(--orange) ${nPct}%,rgba(255,107,53,0.15) ${nPct}%)"
+            oninput="onScore('${key}','${cat.id}','anna',this)">
+        </div>
       </div>
     </div>`;
+  }).join('');
 }
 
-// ════════════════════════════════
-// SLIDE BUTTON
-// ════════════════════════════════
-function initSliders() {
-  document.querySelectorAll('.slider-btn-wrap').forEach(wrap => {
-    const handle = wrap.querySelector('[data-handle]');
-    if (!handle) return;
+function onScore(key, catId, player, input){
+  const val = parseInt(input.value);
+  if(!SC[key]) SC[key]={};
+  SC[key][catId+'_'+player]=val;
+  saveScores(SC);
+  const d=document.getElementById('pv_'+catId+'_'+player);
+  if(d){d.textContent=val;d.classList.remove('bump');void d.offsetWidth;d.classList.add('bump');}
+  const pct=((val-1)/9*100).toFixed(1);
+  if(player==='alex') input.style.background=`linear-gradient(90deg,#2e7d32 ${pct}%,rgba(46,125,50,0.15) ${pct}%)`;
+  else input.style.background=`linear-gradient(90deg,var(--orange) ${pct}%,rgba(255,107,53,0.15) ${pct}%)`;
+}
 
-    let startX = 0, curX = 0, dragging = false;
-    const maxDist = () => wrap.offsetWidth - 58;
+/* ── GAUDI MOSAIC ── */
+function buildMosaic(){
+  const el=document.getElementById('gaudi-mosaic');
+  if(!el) return;
+  const cols=['#FF6B35','#FFD23F','#FF8C69','#52C41A','#FF6B9D','#4ECDC4','#45B7D1','#FFA07A','#98D8C8','#F7DC6F','#BB8FCE','#82E0AA'];
+  let h='';
+  for(let i=0;i<24;i++){
+    const c=cols[i%cols.length];
+    h+=`<div class="mosaic-cell" style="background:${c};--dur:${(2.2+Math.random()*2).toFixed(2)}s;--delay:${(Math.random()*2).toFixed(2)}s;"></div>`;
+  }
+  el.innerHTML=h;
+}
 
-    function onStart(e) {
-      dragging = true;
-      startX = (e.touches ? e.touches[0].clientX : e.clientX) - curX;
-      handle.style.transition = 'none';
+/* ── RESULTS ── */
+function getS(key,catId,p){ return (SC[key]&&SC[key][catId+'_'+p])||5; }
+function buildResults(){
+  let aT=0,nT=0,rows='';
+  [{label:'🏺 Torno Ceràmic',key:'s1',cats:CATS.s1},{label:'🔐 Escape Room Gaudí',key:'s3',cats:CATS.s3}]
+  .forEach(g=>{
+    rows+=`<tr class="section-hdr"><td colspan="3">${g.label}</td></tr>`;
+    g.cats.forEach(cat=>{
+      const a=getS(g.key,cat.id,'alex'), n=getS(g.key,cat.id,'anna');
+      aT+=a; nT+=n;
+      rows+=`<tr><td>${cat.icon} ${cat.name}</td><td class="v-alex">${a}</td><td class="v-anna">${n}</td></tr>`;
+    });
+  });
+  document.getElementById('scores-tbody').innerHTML=rows;
+  document.getElementById('scores-tfoot').innerHTML=`<tr><td>Total punts</td><td class="tot-alex">${aT}</td><td class="tot-anna">${nT}</td></tr>`;
+  const winner=aT>nT?'Alex':nT>aT?'Anna':'Empat!';
+  const icon=winner==='Alex'?'🧭':winner==='Anna'?'👑':'🤝';
+  document.getElementById('winner-name').textContent=winner;
+  document.getElementById('winner-emoji').textContent=icon;
+}
+
+/* ── CHEST ── */
+let chestOpened=false;
+function openChest(){
+  if(chestOpened) return;
+  chestOpened=true;
+  const e=document.getElementById('chest-emoji');
+  const h=document.getElementById('chest-hint');
+  const r=document.getElementById('secret-reveal');
+  e.textContent='📦';
+  setTimeout(()=>{ e.textContent='💎'; e.style.filter='drop-shadow(0 0 24px gold)'; },350);
+  if(h){ h.textContent='✨ Obert!'; h.style.color='rgba(255,210,63,0.9)'; }
+  if(r) r.style.display='block';
+  launchConfetti();
+}
+
+/* ── CASTLE ── */
+function initCastle(){
+  const el=document.getElementById('stars-container');
+  el.innerHTML='';
+  for(let i=0;i<60;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const sz=1+Math.random()*2.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*80}%;--dur:${(2+Math.random()*3).toFixed(2)}s;--del:${(Math.random()*4).toFixed(2)}s;`;
+    el.appendChild(s);
+  }
+  setTimeout(launchConfetti,700);
+}
+
+/* ── FLOATING PARTICLES ── */
+function initParticles(){
+  const wrap=document.getElementById('particles-wrap');
+  const emojis=['✨','⭐','🌟','💫','🧡','💛','🌸','🎉'];
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const sz=12+Math.random()*10;
+    p.style.cssText=`left:${Math.random()*100}%;--sz:${sz}px;--dur:${(18+Math.random()*14).toFixed(0)}s;--del:-${(Math.random()*20).toFixed(0)}s;`;
+    p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    wrap.appendChild(p);
+  }
+}
+
+/* ── CONFETTI ── */
+function launchConfetti(){
+  const canvas=document.getElementById('confetti-canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const pal=['#FF6B35','#FFD23F','#FF8C69','#52C41A','#FF6B9D','#4ECDC4','#ffffff','#FFA07A','#FFE57A'];
+  const pieces=Array.from({length:150},()=>({
+    x:Math.random()*canvas.width, y:-20-Math.random()*canvas.height*0.3,
+    vx:(Math.random()-0.5)*3, vy:1.5+Math.random()*4,
+    r:3+Math.random()*8, color:pal[Math.floor(Math.random()*pal.length)],
+    tilt:Math.random()*360, tiltV:(Math.random()-0.5)*8,
+    shape:Math.random()>0.4?'rect':'circle', alpha:0.9+Math.random()*0.1
+  }));
+  let frame=0;
+  (function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    frame++;
+    let alive=0;
+    pieces.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.tilt+=p.tiltV; p.vy+=0.07;
+      if(p.y<canvas.height+20) alive++;
+      if(p.y>canvas.height+20) return;
+      ctx.save();
+      ctx.globalAlpha=p.alpha*Math.max(0,1-(p.y/canvas.height)*0.5);
+      ctx.fillStyle=p.color;
+      ctx.translate(p.x,p.y); ctx.rotate(p.tilt*Math.PI/180);
+      if(p.shape==='rect') ctx.fillRect(-p.r/2,-p.r/1.5,p.r,p.r*2);
+      else{ ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fill(); }
+      ctx.restore();
+    });
+    if(alive>0&&frame<400) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+}
+
+/* ── SLIDE BUTTONS ── */
+function initSliders(){
+  document.querySelectorAll('.slide-track').forEach(track=>{
+    const handle=track.querySelector('[data-handle]');
+    if(!handle) return;
+    let drag=false, startX=0, offset=0, done=false;
+    const maxX=()=>track.offsetWidth-64;
+    const getX=e=>e.touches?e.touches[0].clientX:e.clientX;
+
+    function onStart(e){
+      if(done) return;
+      drag=true; startX=getX(e)-offset;
+      handle.style.transition='none'; e.preventDefault();
     }
-    function onMove(e) {
-      if (!dragging) return;
-      e.preventDefault();
-      const x = (e.touches ? e.touches[0].clientX : e.clientX) - startX;
-      curX = Math.max(0, Math.min(x, maxDist()));
-      handle.style.left = (5 + curX) + 'px';
-
-      // fade label
-      const pct = curX / maxDist();
-      wrap.querySelector('.slider-btn-label').style.opacity = 1 - pct * 1.5;
+    function onMove(e){
+      if(!drag||done) return; e.preventDefault();
+      offset=Math.max(0,Math.min(getX(e)-startX,maxX()));
+      handle.style.left=(7+offset)+'px';
+      const pct=offset/maxX();
+      const lbl=track.querySelector('.slide-label-text');
+      if(lbl) lbl.style.opacity=Math.max(0,1-pct*2);
     }
-    function onEnd() {
-      if (!dragging) return;
-      dragging = false;
-      if (curX >= maxDist() * 0.85) {
-        // completed
-        handle.style.transition = 'left 0.3s ease';
-        handle.style.left = (maxDist() + 5) + 'px';
-        handle.classList.add('completed');
-        handle.textContent = '✓';
-        setTimeout(() => navigateTo(wrap.dataset.target, wrap.dataset.save), 400);
+    function onEnd(){
+      if(!drag||done) return; drag=false;
+      if(offset>=maxX()*0.8){
+        done=true;
+        handle.style.transition='left 0.25s ease, background 0.3s ease';
+        handle.style.left=(maxX()+7)+'px';
+        handle.classList.add('done');
+        handle.textContent='✓';
+        const lbl=track.querySelector('.slide-label-text');
+        if(lbl) lbl.style.opacity='0';
+        if(track.dataset.savekey) saveScores(SC);
+        setTimeout(()=>{ if(track.dataset.goto) goTo(track.dataset.goto); },360);
       } else {
-        // snap back
-        handle.style.transition = 'left 0.3s ease';
-        handle.style.left = '5px';
-        curX = 0;
-        wrap.querySelector('.slider-btn-label').style.opacity = '';
+        handle.style.transition='left 0.35s cubic-bezier(0.34,1.56,0.64,1)';
+        handle.style.left='7px'; offset=0;
+        const lbl=track.querySelector('.slide-label-text');
+        if(lbl) lbl.style.opacity='';
       }
     }
-
-    handle.addEventListener('mousedown', onStart);
-    handle.addEventListener('touchstart', onStart, { passive: true });
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('mouseup', onEnd);
-    document.addEventListener('touchend', onEnd);
+    handle.addEventListener('touchstart',onStart,{passive:false});
+    document.addEventListener('touchmove',onMove,{passive:false});
+    document.addEventListener('touchend',onEnd);
+    handle.addEventListener('mousedown',onStart);
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onEnd);
   });
 }
 
-// ════════════════════════════════
-// NAVIGATION
-// ════════════════════════════════
-function navigateTo(targetId, saveKey) {
-  if (saveKey) { state[saveKey] = state[saveKey] || true; save(); }
+/* ── BOOT — always s0 ── */
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('s0').classList.add('screen--active');
+  curId='s0';
 
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const target = document.getElementById(targetId);
-  if (target) {
-    target.classList.add('active');
-    window.scrollTo(0, 0);
-  }
-
-  if (targetId === 'screen-4') renderResults();
-  if (targetId === 'screen-5') {
-    initStars();
-    setTimeout(launchConfetti, 600);
-  }
-}
-
-// ════════════════════════════════
-// STARS
-// ════════════════════════════════
-function initStars() {
-  const c = document.getElementById('stars-container');
-  c.innerHTML = '';
-  for (let i = 0; i < 40; i++) {
-    const s = document.createElement('div');
-    s.className = 'star';
-    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*50}%;
-      animation-delay:${Math.random()*3}s; animation-duration:${2+Math.random()*2}s;`;
-    c.appendChild(s);
-  }
-}
-
-// ════════════════════════════════
-// CONFETTI
-// ════════════════════════════════
-function launchConfetti() {
-  const canvas = document.getElementById('confetti-canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  const colors = ['#c9a84c','#e8d08a','#8b1a1a','#2a6b6b','#f5e6c8','#d4af37','#ff6b6b','#4ecdc4'];
-  const pieces = Array.from({ length: 120 }, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * -canvas.height * 0.5,
-    r: 4 + Math.random() * 8,
-    d: 8 + Math.random() * 8,
-    color: colors[Math.floor(Math.random() * colors.length)],
-    tilt: Math.random() * 10 - 10,
-    tiltAngle: 0,
-    tiltAngleInc: Math.random() * 0.07 + 0.05,
-    shape: Math.random() > 0.5 ? 'rect' : 'circle',
-  }));
-
-  let angle = 0, frame = 0;
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    angle += 0.01;
-    frame++;
-    pieces.forEach(p => {
-      ctx.beginPath();
-      ctx.fillStyle = p.color;
-      p.tiltAngle += p.tiltAngleInc;
-      p.y += (Math.cos(angle + p.d) + 3 + p.r / 2) * 0.8;
-      p.x += Math.sin(angle);
-      p.tilt = Math.sin(p.tiltAngle) * 15;
-
-      if (p.shape === 'rect') {
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.tilt * Math.PI / 180);
-        ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*1.5);
-        ctx.restore();
-      } else {
-        ctx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
-        ctx.fill();
-      }
-      if (p.y > canvas.height) { p.y = -20; p.x = Math.random() * canvas.width; }
-    });
-    if (frame < 300) requestAnimationFrame(draw);
-    else ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-  draw();
-}
-
-// ════════════════════════════════
-// CHEST
-// ════════════════════════════════
-function openChest() {
-  const chest = document.getElementById('treasure-chest');
-  const msg   = document.getElementById('chest-msg');
-  const reveal = document.getElementById('secret-reveal');
-  if (chest.textContent === '🔒') {
-    chest.textContent = '📦';
-    chest.classList.add('open');
-    setTimeout(() => { chest.textContent = '💎'; }, 400);
-    msg.textContent = '✨ El tresor s\'ha obert! ✨';
-    msg.style.color = 'var(--gold)';
-    reveal.style.display = 'block';
-    launchConfetti();
-  }
-}
-
-// ════════════════════════════════
-// RESTORE STATE
-// ════════════════════════════════
-function restoreState() {
-  // Find furthest screen reached
-  const screens = ['screen-0','screen-1','screen-2','screen-3','screen-4','screen-5'];
-  let current = 'screen-0';
-  if (state.started) current = 'screen-1';
-  if (state.stop1)   current = 'screen-2';
-  if (state.stop2)   current = 'screen-3';
-  if (state.stop3)   current = 'screen-4';
-  if (state.results) current = 'screen-5';
-
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(current).classList.add('active');
-
-  if (current === 'screen-4') renderResults();
-  if (current === 'screen-5') { initStars(); }
-}
-
-// ════════════════════════════════
-// INIT
-// ════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  renderScores('scores-1', CAT1, 'stop1');
-  renderScores('scores-3', CAT3, 'stop3');
+  buildRouteMap();
+  renderScores('scores-s1','s1');
+  renderScores('scores-s3','s3');
+  buildMosaic();
   initSliders();
-  restoreState();
+  initParticles();
 });
 </script>
 </body>
