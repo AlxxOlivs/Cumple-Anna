@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>El Mapa del Tresor · Anna</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8d08a;
+    --gold-dark: #8b6914;
+    --parchment: #f5e6c8;
+    --parchment-dark: #e8d4a8;
+    --parchment-deep: #d4b896;
+    --ink: #2c1810;
+    --ink-light: #4a2c1a;
+    --red-seal: #8b1a1a;
+    --teal: #2a6b6b;
+    --shadow: rgba(44,24,16,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100%; min-height: 100vh;
+    font-family: 'EB Garamond', serif;
+    background: #1a0f05;
+    overflow-x: hidden;
+  }
+
+  /* ─── PARCHMENT TEXTURE ─── */
+  .parchment-bg {
+    background-color: var(--parchment);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"),
+      radial-gradient(ellipse at 20% 20%, rgba(255,240,200,0.6) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(210,170,120,0.4) 0%, transparent 60%);
+  }
+
+  /* ─── SCREENS ─── */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 40px;
+    animation: fadeIn 0.8s ease forwards;
+    position: relative;
+  }
+  .screen.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── BORDER FRAME ─── */
+  .frame {
+    width: calc(100% - 28px);
+    margin: 14px auto;
+    border: 2px solid var(--gold);
+    box-shadow:
+      0 0 0 4px var(--parchment-dark),
+      0 0 0 6px var(--gold-dark),
+      0 0 24px rgba(201,168,76,0.3),
+      inset 0 0 30px rgba(201,168,76,0.08);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .frame::before, .frame::after {
+    content: '✦';
+    position: absolute;
+    color: var(--gold);
+    font-size: 18px;
+    line-height: 1;
+  }
+  .frame::before { top: 8px; left: 8px; }
+  .frame::after  { bottom: 8px; right: 8px; }
+
+  /* ─── HEADER BAND ─── */
+  .header-band {
+    width: 100%;
+    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-light) 50%, var(--ink) 100%);
+    padding: 18px 20px 14px;
+    text-align: center;
+    position: relative;
+    border-bottom: 3px solid var(--gold);
+  }
+  .header-band::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 14px;
+    background: var(--ink);
+    clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%);
+    border-bottom: 2px solid var(--gold);
+  }
+  .stop-number {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--gold-light);
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+  .stop-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 20px;
+    color: var(--gold-light);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    line-height: 1.2;
+  }
+
+  /* ─── CONTENT AREA ─── */
+  .content-area {
+    width: 100%;
+    padding: 28px 20px 20px;
+    flex: 1;
+  }
+
+  /* ─── MAP ROUTE ─── */
+  .map-route {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 0 6px;
+    flex-wrap: wrap;
+  }
+  .route-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--parchment-deep);
+    border: 2px solid var(--gold-dark);
+    transition: all 0.4s ease;
+  }
+  .route-dot.done { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+  .route-dot.active { background: var(--red-seal); box-shadow: 0 0 8px var(--red-seal); transform: scale(1.3); }
+  .route-line { width: 18px; height: 2px; background: var(--gold-dark); opacity: 0.5; }
+
+  /* ─── COMPASS ROSE ─── */
+  .compass {
+    text-align: center;
+    font-size: 48px;
+    margin: 10px 0;
+    animation: compassSpin 20s linear infinite;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    display: inline-block;
+  }
+  @keyframes compassSpin {
+    0%   { transform: rotate(0deg); }
+    25%  { transform: rotate(3deg); }
+    75%  { transform: rotate(-3deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  /* ─── SEAL ─── */
+  .wax-seal {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #c0392b, var(--red-seal) 50%, #6b0f0f);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 28px;
+    animation: sealPulse 3s ease-in-out infinite;
+  }
+  @keyframes sealPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    50% { transform: scale(1.04); box-shadow: 0 6px 20px rgba(139,26,26,0.5); }
+  }
+
+  /* ─── WELCOME TEXT ─── */
+  .welcome-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 28px;
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 6px;
+    text-shadow: 1px 1px 0 var(--parchment-deep);
+  }
+  .welcome-subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--gold-dark);
+    text-align: center;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+  .welcome-text {
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--ink-light);
+    text-align: center;
+    font-style: italic;
+    padding: 0 4px;
+    position: relative;
+  }
+  .welcome-text::before, .welcome-text::after {
+    content: '❝';
+    color: var(--gold);
+    font-size: 28px;
+    opacity: 0.6;
+    display: block;
+    text-align: left;
+    line-height: 1;
+  }
+  .welcome-text::after { content: '❞'; text-align: right; }
+
+  /* ─── SECTION DIVIDER ─── */
+  .divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 18px 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dark), transparent);
+  }
+  .divider-icon { color: var(--gold); font-size: 16px; }
+
+  /* ─── SCORING GRID ─── */
+  .scoring-section { margin-bottom: 8px; }
+  .scoring-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .score-category {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    padding: 14px 14px 10px;
+    margin-bottom: 12px;
+  }
+  .cat-name {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cat-icon { font-size: 18px; }
+
+  .score-row {
+    display: grid;
+    grid-template-columns: 52px 1fr 52px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .score-name {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-align: center;
+    color: var(--ink-light);
+    text-transform: uppercase;
+  }
+  .score-name.alex { color: var(--teal); }
+  .score-name.anna { color: var(--red-seal); }
+
+  .score-val {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 22px;
+    text-align: center;
+    font-weight: 700;
+    transition: all 0.2s ease;
+  }
+  .score-val.alex { color: var(--teal); }
+  .score-val.anna { color: var(--red-seal); }
+
+  .slider-wrapper { position: relative; }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, var(--gold-light), var(--gold-dark));
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  input[type=range]::-webkit-slider-thumb:active { transform: scale(1.2); }
+
+  /* ─── BODY TEXT ─── */
+  .body-text {
+    font-size: 16px;
+    line-height: 1.85;
+    color: var(--ink-light);
+    text-align: justify;
+    font-style: italic;
+  }
+
+  /* ─── ICON BADGE ─── */
+  .icon-badge {
+    text-align: center;
+    font-size: 52px;
+    margin: 8px 0 16px;
+    animation: floatBob 4s ease-in-out infinite;
+  }
+  @keyframes floatBob {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  /* ─── RESULTS TABLE ─── */
+  .results-card {
+    background: rgba(44,24,16,0.06);
+    border: 1px solid var(--gold-dark);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .results-header {
+    background: linear-gradient(135deg, var(--ink), var(--ink-light));
+    padding: 10px 16px;
+    display: grid;
+    grid-template-columns: 1fr 80px 80px;
+    gap: 6px;
+  }
+  .results-header span {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--gold-light);
+  }
+  .results-header span:first-child { text-align: left; }
+
+  .results-row {
+    padding: 10px 16px;
+    display: grid;
+    grid-template-columns: 1fr 80px 80px;
+    gap: 6px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    transition: background 0.2s;
+  }
+  .results-row:last-child { border-bottom: none; }
+  .results-row span { font-size: 14px; color: var(--ink-light); text-align: center; }
+  .results-row span:first-child { text-align: left; font-style: italic; }
+  .results-row .s-alex { color: var(--teal); font-family: 'Cinzel', serif; font-weight: 600; }
+  .results-row .s-anna { color: var(--red-seal); font-family: 'Cinzel', serif; font-weight: 600; }
+
+  .results-total {
+    background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.05));
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: 1fr 80px 80px;
+    gap: 6px;
+    border-top: 2px solid var(--gold);
+  }
+  .results-total span { text-align: center; }
+  .results-total .label {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    text-align: left;
+  }
+  .results-total .t-alex { font-family: 'Cinzel Decorative', serif; font-size: 24px; color: var(--teal); }
+  .results-total .t-anna { font-family: 'Cinzel Decorative', serif; font-size: 24px; color: var(--red-seal); }
+
+  .winner-banner {
+    text-align: center;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--ink), #3a1f0a);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    border: 1px solid var(--gold);
+  }
+  .winner-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 4px;
+  }
+  .winner-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 26px;
+    color: var(--gold-light);
+    text-shadow: 0 0 20px rgba(201,168,76,0.6);
+    animation: glow 2s ease-in-out infinite;
+  }
+  @keyframes glow {
+    0%, 100% { text-shadow: 0 0 10px rgba(201,168,76,0.4); }
+    50%       { text-shadow: 0 0 30px rgba(201,168,76,0.9), 0 0 60px rgba(201,168,76,0.4); }
+  }
+
+  /* ─── CASTLE SCREEN ─── */
+  .castle-art {
+    text-align: center;
+    font-size: 72px;
+    margin: 16px 0 8px;
+    animation: castleReveal 1s ease forwards;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+  }
+  @keyframes castleReveal {
+    from { transform: scale(0.5) translateY(30px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .treasure-chest {
+    font-size: 60px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    margin: 10px 0;
+    animation: chestBounce 1s ease 1.2s both;
+  }
+  @keyframes chestBounce {
+    0%   { transform: scale(0) rotate(-10deg); }
+    60%  { transform: scale(1.15) rotate(5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .treasure-chest.open { animation: chestOpen 0.5s ease forwards; }
+  @keyframes chestOpen {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.2) rotate(-5deg); }
+    100% { transform: scale(1.1); filter: drop-shadow(0 0 20px gold); }
+  }
+
+  /* ─── CONFETTI ─── */
+  #confetti-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─── SLIDE-TO-UNLOCK BUTTON ─── */
+  .slider-btn-wrap {
+    position: relative;
+    width: calc(100% - 40px);
+    margin: 24px auto 8px;
+    height: 58px;
+    background: linear-gradient(135deg, var(--ink), var(--ink-light));
+    border-radius: 29px;
+    border: 2px solid var(--gold-dark);
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(201,168,76,0.2);
+  }
+  .slider-btn-track {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding-left: 72px;
+    pointer-events: none;
+  }
+  .slider-btn-label {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.7);
+    animation: labelPulse 2s ease-in-out infinite;
+    white-space: nowrap;
+  }
+  @keyframes labelPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+  .slider-btn-arrows {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(201,168,76,0.4);
+    font-size: 18px;
+    letter-spacing: -4px;
+    pointer-events: none;
+  }
+  .slider-btn-handle {
+    position: absolute;
+    top: 5px; left: 5px;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, var(--gold-light), var(--gold-dark));
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+    cursor: grab;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    z-index: 2;
+    transition: box-shadow 0.2s ease;
+    touch-action: none;
+    user-select: none;
+  }
+  .slider-btn-handle:active { cursor: grabbing; box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+  .slider-btn-handle.completed {
+    left: calc(100% - 53px) !important;
+    background: radial-gradient(circle at 35% 35%, #6dbb6d, #2e7d32);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4), 0 0 20px rgba(76,175,80,0.6);
+  }
+
+  /* ─── THEME OVERLAYS ─── */
+  /* Clay theme */
+  .clay-bg {
+    background-color: #c4956a;
+    background-image:
+      radial-gradient(ellipse at 30% 20%, #d4a67a 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 80%, #a0724a 0%, transparent 50%);
+  }
+  .clay-bg .frame {
+    background: #f0dcc4;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0.2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+  }
+  .clay-handprints {
+    position: absolute;
+    top: 0; right: 0;
+    font-size: 60px;
+    opacity: 0.12;
+    transform: rotate(25deg) translate(10px, -10px);
+    pointer-events: none;
+  }
+
+  /* Tapas theme */
+  .tapas-tile {
+    width: 100%;
+    height: 8px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--teal) 0px, var(--teal) 20px,
+      var(--gold) 20px, var(--gold) 22px,
+      var(--red-seal) 22px, var(--red-seal) 42px,
+      var(--gold) 42px, var(--gold) 44px
+    );
+    opacity: 0.7;
+  }
+  .azulejo-pattern {
+    width: 100%;
+    height: 40px;
+    background:
+      repeating-linear-gradient(45deg, rgba(42,107,107,0.15) 0px, rgba(42,107,107,0.15) 4px, transparent 4px, transparent 12px),
+      repeating-linear-gradient(-45deg, rgba(139,26,26,0.1) 0px, rgba(139,26,26,0.1) 4px, transparent 4px, transparent 12px);
+  }
+
+  /* Gaudi theme */
+  .gaudi-mosaic {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 3px;
+    margin: 10px 0;
+    height: 60px;
+    overflow: hidden;
+    border-radius: 8px;
+    opacity: 0.7;
+  }
+  .mosaic-tile {
+    border-radius: 2px;
+    animation: mosaicShimmer 3s ease-in-out infinite;
+  }
+  @keyframes mosaicShimmer {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+  .mosaic-tile:nth-child(1)  { background: #e74c3c; animation-delay: 0s; }
+  .mosaic-tile:nth-child(2)  { background: #f39c12; animation-delay: 0.1s; }
+  .mosaic-tile:nth-child(3)  { background: #27ae60; animation-delay: 0.2s; }
+  .mosaic-tile:nth-child(4)  { background: #2980b9; animation-delay: 0.3s; }
+  .mosaic-tile:nth-child(5)  { background: #8e44ad; animation-delay: 0.4s; }
+  .mosaic-tile:nth-child(6)  { background: #e74c3c; animation-delay: 0.5s; }
+  .mosaic-tile:nth-child(7)  { background: #f1c40f; animation-delay: 0.15s; }
+  .mosaic-tile:nth-child(8)  { background: #1abc9c; animation-delay: 0.25s; }
+  .mosaic-tile:nth-child(9)  { background: #e67e22; animation-delay: 0.35s; }
+  .mosaic-tile:nth-child(10) { background: #3498db; animation-delay: 0.45s; }
+  .mosaic-tile:nth-child(11) { background: #9b59b6; animation-delay: 0.55s; }
+  .mosaic-tile:nth-child(12) { background: #2ecc71; animation-delay: 0.05s; }
+
+  /* Castle theme */
+  .castle-bg {
+    background: linear-gradient(180deg, #0d0d2b 0%, #1a1a3e 40%, #2d1a00 100%);
+  }
+  .castle-bg .frame { background: linear-gradient(180deg, #1a1a3e 0%, #2d1a00 100%); border-color: var(--gold); }
+  .castle-bg .body-text, .castle-bg .welcome-text { color: #e8d4a8; }
+  .castle-bg .stop-number, .castle-bg .welcome-subtitle { color: var(--gold-light); }
+  .castle-stars {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: starTwinkle 3s ease-in-out infinite;
+  }
+  @keyframes starTwinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* ─── FOOTER NOTE ─── */
+  .footer-note {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(44,24,16,0.35);
+    font-style: italic;
+    margin-top: 12px;
+    padding: 0 20px;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-track {
+    width: 100%;
+    height: 3px;
+    background: rgba(201,168,76,0.2);
+    margin-bottom: 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+    transition: width 1s ease;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 0: WELCOME
+════════════════════════════════════════════ -->
+<div id="screen-0" class="screen parchment-bg active">
+  <div class="frame parchment-bg" style="margin-top:20px;">
+    <div style="text-align:center; padding: 28px 20px 0;">
+      <div class="compass">🧭</div>
+      <div class="welcome-title">Anna</div>
+      <div class="welcome-subtitle">· El teu regal especial ·</div>
+    </div>
+
+    <div class="divider"><span class="divider-icon">⚜</span></div>
+
+    <div class="content-area" style="padding-top:0;">
+      <div class="welcome-text">
+        Hola mi amor, t'he fet això per tu perquè a mi les manualitats no se'm donen gaire bé, algun dia prometo fer-te algo amb les mans però espero que t'encanti igualment el dia d'avui. T'estimo moltíssim.
+      </div>
+
+      <div class="divider" style="margin-top:24px;"><span class="divider-icon">✦</span></div>
+
+      <div style="text-align:center; margin: 8px 0 4px;">
+        <div class="wax-seal">🗺</div>
+        <p style="font-family:'Cinzel',serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--gold-dark); margin-bottom:4px;">21 · III · MMXXV</p>
+        <p style="font-size:14px; color:var(--ink-light); font-style:italic;">Tres parades. Un tresor. Una aventura.</p>
+      </div>
+    </div>
+
+    <div class="slider-btn-wrap" data-target="screen-1" data-save="started">
+      <div class="slider-btn-track"><span class="slider-btn-label">Llisca per Començar</span></div>
+      <div class="slider-btn-arrows">›› </div>
+      <div class="slider-btn-handle" data-handle>🧭</div>
+    </div>
+    <p class="footer-note" style="padding-bottom:20px;">Llisca el botó fins al final →</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 1: TORNO CERÀMIC
+════════════════════════════════════════════ -->
+<div id="screen-1" class="screen parchment-bg">
+  <div class="frame parchment-bg" style="margin-top:20px; position:relative; overflow:visible;">
+    <span class="clay-handprints">🤲</span>
+
+    <div class="header-band">
+      <div class="stop-number">Parada 1 de 3</div>
+      <div class="stop-title">Torno Ceràmic 🏺</div>
+    </div>
+
+    <div class="map-route" style="padding: 12px 0 0;">
+      <div class="route-dot done"></div><div class="route-line"></div>
+      <div class="route-dot active"></div><div class="route-line"></div>
+      <div class="route-dot"></div><div class="route-line"></div>
+      <div class="route-dot"></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:25%"></div></div>
+
+    <div class="content-area">
+      <div class="icon-badge">🏺</div>
+
+      <div class="scoring-label">— Puntua les categories del 1 al 10 —</div>
+
+      <div id="scores-1"></div>
+    </div>
+
+    <div class="slider-btn-wrap" data-target="screen-2" data-save="stop1">
+      <div class="slider-btn-track"><span class="slider-btn-label">Confirmar i Continuar</span></div>
+      <div class="slider-btn-arrows">›› </div>
+      <div class="slider-btn-handle" data-handle>🏺</div>
+    </div>
+    <p class="footer-note" style="padding-bottom:20px;">Les puntuacions es guardaran automàticament</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 2: TAPES LA BONA SORT
+════════════════════════════════════════════ -->
+<div id="screen-2" class="screen parchment-bg">
+  <div class="frame parchment-bg" style="margin-top:20px;">
+
+    <div class="tapas-tile"></div>
+    <div class="header-band">
+      <div class="stop-number">Parada 2 de 3</div>
+      <div class="stop-title">Tapes la Bona Sort 🍽</div>
+    </div>
+    <div class="tapas-tile"></div>
+    <div class="azulejo-pattern"></div>
+
+    <div class="map-route" style="padding: 12px 0 0;">
+      <div class="route-dot done"></div><div class="route-line"></div>
+      <div class="route-dot done"></div><div class="route-line"></div>
+      <div class="route-dot active"></div><div class="route-line"></div>
+      <div class="route-dot"></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:50%"></div></div>
+
+    <div class="content-area">
+      <div class="icon-badge">🍢</div>
+
+      <div class="welcome-text">
+        Honestament, m'ha costat una mica trobar un restaurant per anar avui, però he triat Tapes la Bona Sort perquè junta la cuina tradicional que sé que a tu t'agrada molt amb les tapes que crec que als 2 ens encanten i espero que ens vinguin realment de gust quan estiguis llegint això :)
+      </div>
+
+      <div class="divider"><span class="divider-icon">🫒</span></div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px;">
+        <div style="background:rgba(42,107,107,0.08); border:1px solid rgba(42,107,107,0.3); border-radius:8px; padding:12px; text-align:center;">
+          <div style="font-size:24px; margin-bottom:6px;">🥘</div>
+          <div style="font-family:'Cinzel',serif; font-size:11px; color:var(--teal); letter-spacing:1px;">Cuina tradicional</div>
+        </div>
+        <div style="background:rgba(139,26,26,0.08); border:1px solid rgba(139,26,26,0.3); border-radius:8px; padding:12px; text-align:center;">
+          <div style="font-size:24px; margin-bottom:6px;">🍷</div>
+          <div style="font-family:'Cinzel',serif; font-size:11px; color:var(--red-seal); letter-spacing:1px;">Tapes i bon vi</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slider-btn-wrap" data-target="screen-3" data-save="stop2">
+      <div class="slider-btn-track"><span class="slider-btn-label">Continuar l'Aventura</span></div>
+      <div class="slider-btn-arrows">›› </div>
+      <div class="slider-btn-handle" data-handle>🍽</div>
+    </div>
+    <p class="footer-note" style="padding-bottom:20px;">Bon profit! 🍴</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 3: ESCAPE ROOM GAUDÍ
+════════════════════════════════════════════ -->
+<div id="screen-3" class="screen parchment-bg">
+  <div class="frame parchment-bg" style="margin-top:20px;">
+
+    <div class="header-band">
+      <div class="stop-number">Parada 3 de 3</div>
+      <div class="stop-title">Escape Room Gaudí 🔍</div>
+    </div>
+
+    <div class="gaudi-mosaic">
+      <div class="mosaic-tile"></div><div class="mosaic-tile"></div><div class="mosaic-tile"></div>
+      <div class="mosaic-tile"></div><div class="mosaic-tile"></div><div class="mosaic-tile"></div>
+      <div class="mosaic-tile"></div><div class="mosaic-tile"></div><div class="mosaic-tile"></div>
+      <div class="mosaic-tile"></div><div class="mosaic-tile"></div><div class="mosaic-tile"></div>
+    </div>
+
+    <div class="map-route" style="padding: 8px 0 0;">
+      <div class="route-dot done"></div><div class="route-line"></div>
+      <div class="route-dot done"></div><div class="route-line"></div>
+      <div class="route-dot done"></div><div class="route-line"></div>
+      <div class="route-dot active"></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:75%"></div></div>
+
+    <div class="content-area">
+      <div class="icon-badge">🔐</div>
+      <div class="scoring-label">— L'última competició —</div>
+      <div id="scores-3"></div>
+    </div>
+
+    <div class="slider-btn-wrap" data-target="screen-4" data-save="stop3">
+      <div class="slider-btn-track"><span class="slider-btn-label">Veure Resultats Finals</span></div>
+      <div class="slider-btn-arrows">›› </div>
+      <div class="slider-btn-handle" data-handle>🔐</div>
+    </div>
+    <p class="footer-note" style="padding-bottom:20px;">Qui haurà guanyat...?</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 4: RESULTS
+════════════════════════════════════════════ -->
+<div id="screen-4" class="screen parchment-bg">
+  <div class="frame parchment-bg" style="margin-top:20px;">
+
+    <div class="header-band">
+      <div class="stop-number">· Resultats Finals ·</div>
+      <div class="stop-title">La Taula del Veredicte 🏆</div>
+    </div>
+
+    <div class="content-area">
+      <div class="icon-badge">🏆</div>
+      <div id="results-content"></div>
+    </div>
+
+    <div class="slider-btn-wrap" data-target="screen-5" data-save="results">
+      <div class="slider-btn-track"><span class="slider-btn-label">Descobrir el Secret Final</span></div>
+      <div class="slider-btn-arrows">›› </div>
+      <div class="slider-btn-handle" data-handle>🏆</div>
+    </div>
+    <p class="footer-note" style="padding-bottom:20px;">L'últim detall t'espera...</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 5: SECRET CASTLE
+════════════════════════════════════════════ -->
+<div id="screen-5" class="screen castle-bg">
+  <div class="castle-stars" id="stars-container"></div>
+  <div class="frame" style="margin-top:20px; background: rgba(13,13,43,0.85); border-color:var(--gold);">
+
+    <div class="header-band" style="background: linear-gradient(135deg, #0d0d2b, #1a1a3e);">
+      <div class="stop-number" style="color:var(--gold-light);">· La Casella Secreta ·</div>
+      <div class="stop-title" style="color:var(--gold-light);">El Castell 🏰</div>
+    </div>
+
+    <div class="content-area">
+      <div class="castle-art">🏰</div>
+      <div id="treasure-chest" class="treasure-chest" onclick="openChest()">🔒</div>
+      <div id="chest-msg" style="text-align:center; font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px; color:var(--gold-dark); opacity:0.7; margin-bottom:16px;">Toca el cofre per obrir-lo</div>
+
+      <div class="divider"><span class="divider-icon" style="color:var(--gold);">✦</span></div>
+
+      <div class="welcome-text" style="color:#e8d4a8;">
+        Enhorabona, has arribat al final del teu regal, espero que t'ho hagis passat super bé amb mi, i ara només queda un petit detallet...
+      </div>
+
+      <div id="secret-reveal" style="display:none; text-align:center; margin-top:20px; animation: fadeIn 1s ease forwards;">
+        <div style="background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05)); border:2px solid var(--gold); border-radius:12px; padding:20px;">
+          <div style="font-size:36px; margin-bottom:10px;">💌</div>
+          <div style="font-family:'Cinzel Decorative',serif; font-size:18px; color:var(--gold-light); margin-bottom:10px; text-shadow: 0 0 20px rgba(201,168,76,0.5);">Feliç Aniversari, Anna!</div>
+          <div style="font-size:15px; color:#e8d4a8; font-style:italic; line-height:1.8;">
+            Gràcies per fer cada dia una petita aventura.<br>T'estimo 🌹
+          </div>
+        </div>
+        <div style="margin-top:16px; font-size:11px; font-family:'Cinzel',serif; letter-spacing:2px; color:var(--gold-dark); text-transform:uppercase;">
+          · 21 de Març de 2025 ·
+        </div>
+      </div>
+    </div>
+
+    <p class="footer-note" style="padding-bottom:24px; color:rgba(232,208,138,0.4);">Fet amb molt d'amor 💛</p>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════
+// DATA & CATEGORIES
+// ════════════════════════════════
+const CAT1 = [
+  { id:'c1_1', icon:'🎨', name:'Habilitat Tècnica' },
+  { id:'c1_2', icon:'💥', name:'Nivell de Desastre' },
+  { id:'c1_3', icon:'🏆', name:'Resultat Final' },
+  { id:'c1_4', icon:'✨', name:'Creativitat' },
+  { id:'c1_5', icon:'🧘', name:'Actitud / Paciència' },
+];
+const CAT3 = [
+  { id:'c3_1', icon:'🦅', name:"Ull de Linx / Cerca" },
+  { id:'c3_2', icon:'🧠', name:'Cervell / Lògica' },
+  { id:'c3_3', icon:'🤝', name:'Treball en Equip' },
+];
+
+let state = JSON.parse(localStorage.getItem('treasureState') || '{}');
+
+function save() {
+  localStorage.setItem('treasureState', JSON.stringify(state));
+}
+
+// ════════════════════════════════
+// RENDER SCORE CATEGORIES
+// ════════════════════════════════
+function renderScores(containerId, cats, stateKey) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  if (!state[stateKey]) state[stateKey] = {};
+
+  let html = '';
+  cats.forEach(cat => {
+    const aVal = state[stateKey][cat.id+'_alex'] ?? 5;
+    const nVal = state[stateKey][cat.id+'_anna'] ?? 5;
+    html += `
+    <div class="score-category">
+      <div class="cat-name"><span class="cat-icon">${cat.icon}</span>${cat.name}</div>
+      <div class="score-row">
+        <div>
+          <div class="score-name alex">Alex</div>
+          <div class="score-val alex" id="v_${cat.id}_alex">${aVal}</div>
+        </div>
+        <div>
+          <input type="range" min="1" max="10" value="${aVal}"
+            oninput="updateScore('${stateKey}','${cat.id}','alex',this.value)"
+            style="width:100%; margin-bottom:6px;">
+          <input type="range" min="1" max="10" value="${nVal}"
+            oninput="updateScore('${stateKey}','${cat.id}','anna',this.value)">
+        </div>
+        <div>
+          <div class="score-name anna">Anna</div>
+          <div class="score-val anna" id="v_${cat.id}_anna">${nVal}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+function updateScore(stateKey, catId, player, val) {
+  if (!state[stateKey]) state[stateKey] = {};
+  state[stateKey][catId+'_'+player] = parseInt(val);
+  const el = document.getElementById(`v_${catId}_${player}`);
+  if (el) el.textContent = val;
+  save();
+}
+
+// ════════════════════════════════
+// RESULTS
+// ════════════════════════════════
+function renderResults() {
+  const wrap = document.getElementById('results-content');
+  if (!wrap) return;
+
+  const s1 = state.stop1 || {};
+  const s3 = state.stop3 || {};
+
+  let alexTotal = 0, annaTotal = 0;
+  let rows = '';
+
+  const allCats = [
+    { cats: CAT1, label: '🏺 Torno', key: 's1', data: s1 },
+    { cats: CAT3, label: '🔐 Escape', key: 's3', data: s3 },
+  ];
+
+  allCats.forEach(group => {
+    rows += `<div class="results-row"><span colspan="3" style="color:var(--gold-dark); font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px; text-align:left; grid-column:1/-1;">${group.label}</span></div>`;
+    group.cats.forEach(cat => {
+      const a = group.data[cat.id+'_alex'] ?? 5;
+      const n = group.data[cat.id+'_anna'] ?? 5;
+      alexTotal += a; annaTotal += n;
+      rows += `<div class="results-row">
+        <span>${cat.icon} ${cat.name}</span>
+        <span class="s-alex">${a}</span>
+        <span class="s-anna">${n}</span>
+      </div>`;
+    });
+  });
+
+  const winner = alexTotal > annaTotal ? 'Alex' : annaTotal > alexTotal ? 'Anna' : 'Empat!';
+  const winnerEmoji = winner === 'Alex' ? '🧭' : winner === 'Anna' ? '👑' : '🤝';
+
+  wrap.innerHTML = `
+    <div class="winner-banner">
+      <div class="winner-label">Campió Global</div>
+      <div class="winner-name">${winnerEmoji} ${winner} ${winnerEmoji}</div>
+    </div>
+    <div class="results-card">
+      <div class="results-header">
+        <span>Categoria</span>
+        <span style="color:var(--teal);">Alex</span>
+        <span style="color:var(--red-seal);">Anna</span>
+      </div>
+      ${rows}
+      <div class="results-total">
+        <span class="label">Total</span>
+        <span class="t-alex">${alexTotal}</span>
+        <span class="t-anna">${annaTotal}</span>
+      </div>
+    </div>`;
+}
+
+// ════════════════════════════════
+// SLIDE BUTTON
+// ════════════════════════════════
+function initSliders() {
+  document.querySelectorAll('.slider-btn-wrap').forEach(wrap => {
+    const handle = wrap.querySelector('[data-handle]');
+    if (!handle) return;
+
+    let startX = 0, curX = 0, dragging = false;
+    const maxDist = () => wrap.offsetWidth - 58;
+
+    function onStart(e) {
+      dragging = true;
+      startX = (e.touches ? e.touches[0].clientX : e.clientX) - curX;
+      handle.style.transition = 'none';
+    }
+    function onMove(e) {
+      if (!dragging) return;
+      e.preventDefault();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - startX;
+      curX = Math.max(0, Math.min(x, maxDist()));
+      handle.style.left = (5 + curX) + 'px';
+
+      // fade label
+      const pct = curX / maxDist();
+      wrap.querySelector('.slider-btn-label').style.opacity = 1 - pct * 1.5;
+    }
+    function onEnd() {
+      if (!dragging) return;
+      dragging = false;
+      if (curX >= maxDist() * 0.85) {
+        // completed
+        handle.style.transition = 'left 0.3s ease';
+        handle.style.left = (maxDist() + 5) + 'px';
+        handle.classList.add('completed');
+        handle.textContent = '✓';
+        setTimeout(() => navigateTo(wrap.dataset.target, wrap.dataset.save), 400);
+      } else {
+        // snap back
+        handle.style.transition = 'left 0.3s ease';
+        handle.style.left = '5px';
+        curX = 0;
+        wrap.querySelector('.slider-btn-label').style.opacity = '';
+      }
+    }
+
+    handle.addEventListener('mousedown', onStart);
+    handle.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('mouseup', onEnd);
+    document.addEventListener('touchend', onEnd);
+  });
+}
+
+// ════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════
+function navigateTo(targetId, saveKey) {
+  if (saveKey) { state[saveKey] = state[saveKey] || true; save(); }
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(targetId);
+  if (target) {
+    target.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  if (targetId === 'screen-4') renderResults();
+  if (targetId === 'screen-5') {
+    initStars();
+    setTimeout(launchConfetti, 600);
+  }
+}
+
+// ════════════════════════════════
+// STARS
+// ════════════════════════════════
+function initStars() {
+  const c = document.getElementById('stars-container');
+  c.innerHTML = '';
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*50}%;
+      animation-delay:${Math.random()*3}s; animation-duration:${2+Math.random()*2}s;`;
+    c.appendChild(s);
+  }
+}
+
+// ════════════════════════════════
+// CONFETTI
+// ════════════════════════════════
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ['#c9a84c','#e8d08a','#8b1a1a','#2a6b6b','#f5e6c8','#d4af37','#ff6b6b','#4ecdc4'];
+  const pieces = Array.from({ length: 120 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height * 0.5,
+    r: 4 + Math.random() * 8,
+    d: 8 + Math.random() * 8,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    tilt: Math.random() * 10 - 10,
+    tiltAngle: 0,
+    tiltAngleInc: Math.random() * 0.07 + 0.05,
+    shape: Math.random() > 0.5 ? 'rect' : 'circle',
+  }));
+
+  let angle = 0, frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    angle += 0.01;
+    frame++;
+    pieces.forEach(p => {
+      ctx.beginPath();
+      ctx.fillStyle = p.color;
+      p.tiltAngle += p.tiltAngleInc;
+      p.y += (Math.cos(angle + p.d) + 3 + p.r / 2) * 0.8;
+      p.x += Math.sin(angle);
+      p.tilt = Math.sin(p.tiltAngle) * 15;
+
+      if (p.shape === 'rect') {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.tilt * Math.PI / 180);
+        ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*1.5);
+        ctx.restore();
+      } else {
+        ctx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
+        ctx.fill();
+      }
+      if (p.y > canvas.height) { p.y = -20; p.x = Math.random() * canvas.width; }
+    });
+    if (frame < 300) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+// ════════════════════════════════
+// CHEST
+// ════════════════════════════════
+function openChest() {
+  const chest = document.getElementById('treasure-chest');
+  const msg   = document.getElementById('chest-msg');
+  const reveal = document.getElementById('secret-reveal');
+  if (chest.textContent === '🔒') {
+    chest.textContent = '📦';
+    chest.classList.add('open');
+    setTimeout(() => { chest.textContent = '💎'; }, 400);
+    msg.textContent = '✨ El tresor s\'ha obert! ✨';
+    msg.style.color = 'var(--gold)';
+    reveal.style.display = 'block';
+    launchConfetti();
+  }
+}
+
+// ════════════════════════════════
+// RESTORE STATE
+// ════════════════════════════════
+function restoreState() {
+  // Find furthest screen reached
+  const screens = ['screen-0','screen-1','screen-2','screen-3','screen-4','screen-5'];
+  let current = 'screen-0';
+  if (state.started) current = 'screen-1';
+  if (state.stop1)   current = 'screen-2';
+  if (state.stop2)   current = 'screen-3';
+  if (state.stop3)   current = 'screen-4';
+  if (state.results) current = 'screen-5';
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(current).classList.add('active');
+
+  if (current === 'screen-4') renderResults();
+  if (current === 'screen-5') { initStars(); }
+}
+
+// ════════════════════════════════
+// INIT
+// ════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  renderScores('scores-1', CAT1, 'stop1');
+  renderScores('scores-3', CAT3, 'stop3');
+  initSliders();
+  restoreState();
+});
+</script>
+</body>
+</html>
